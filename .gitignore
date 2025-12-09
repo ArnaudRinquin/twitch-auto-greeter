@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# Build outputs
+.output/
+dist/
+*.zip
+
+# WXT cache
+.wxt/
+
+# Testing
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Local config
+.claude/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
