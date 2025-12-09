@@ -13,6 +13,8 @@ Twitch recently changed the way it counts spectators by only counting the ones s
 - **Natural Timing**: Random 10-15 second delay after joining a stream
 - **Greeting History**: View when you last greeted each streamer
 
+![Screenshot of settings](./screenshot_settings.png)
+
 ## Installation
 
 ### From Source (Manual)
