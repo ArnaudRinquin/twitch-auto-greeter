@@ -16,4 +16,11 @@ export default defineConfig({
       default_title: 'Twitch Auto-Greeter Settings',
     },
   },
+  hooks: {
+    'build:manifestGenerated': (wxt, manifest) => {
+      if (manifest.options_ui) {
+        manifest.options_ui.open_in_tab = true;
+      }
+    },
+  },
 });
