@@ -12,8 +12,20 @@ export default defineConfig({
     version: '0.1.0',
     permissions: ['storage', 'tabs'],
     host_permissions: ['*://*.twitch.tv/*'],
+    icons: {
+      16: '/icon-16.png',
+      32: '/icon-32.png',
+      48: '/icon-48.png',
+      128: '/icon-128.png',
+    },
     action: {
       default_title: 'Twitch Auto-Greeter Settings',
+      default_icon: {
+        16: '/icon-16.png',
+        32: '/icon-32.png',
+        48: '/icon-48.png',
+        128: '/icon-128.png',
+      },
     },
   },
   hooks: {
