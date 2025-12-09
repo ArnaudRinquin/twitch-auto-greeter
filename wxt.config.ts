@@ -12,5 +12,8 @@ export default defineConfig({
     version: '0.1.0',
     permissions: ['storage', 'tabs'],
     host_permissions: ['*://*.twitch.tv/*'],
+    action: {
+      default_title: 'Twitch Auto-Greeter Settings',
+    },
   },
 });

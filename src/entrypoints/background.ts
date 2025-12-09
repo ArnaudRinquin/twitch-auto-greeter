@@ -1,6 +1,11 @@
 export default defineBackground(() => {
   console.log('[Twitch Auto-Greeter] Background script loaded');
 
+  // Open options page when extension icon is clicked
+  browser.action.onClicked.addListener(() => {
+    browser.runtime.openOptionsPage();
+  });
+
   // Listen for messages from content scripts
   browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     console.log('[Background] Received message:', message);
