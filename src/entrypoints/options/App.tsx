@@ -258,7 +258,7 @@ function App() {
               <div className="flex space-x-2">
                 <input
                   type="text"
-                  placeholder="Streamer name"
+                  placeholder="Enter streamer name (one at a time)"
                   value={newEnabledStreamer}
                   onChange={(e) => setNewEnabledStreamer(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddEnabledStreamer()}
@@ -272,7 +272,7 @@ function App() {
                 </button>
               </div>
               <p className="mt-1 text-sm text-gray-500">
-                If set, only greet these streamers
+                If set, only greet these streamers (press Enter or click Add)
               </p>
             </div>
 
@@ -302,7 +302,7 @@ function App() {
               <div className="flex space-x-2">
                 <input
                   type="text"
-                  placeholder="Streamer name"
+                  placeholder="Enter streamer name (one at a time)"
                   value={newDisabledStreamer}
                   onChange={(e) => setNewDisabledStreamer(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddDisabledStreamer()}
@@ -316,7 +316,7 @@ function App() {
                 </button>
               </div>
               <p className="mt-1 text-sm text-gray-500">
-                Never greet these streamers (takes precedence)
+                Never greet these streamers (takes precedence, press Enter or click Add)
               </p>
             </div>
           </div>
