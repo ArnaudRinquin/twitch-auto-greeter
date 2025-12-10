@@ -1,16 +1,21 @@
 import type { MessageConfig } from '../types';
 
 /**
- * Filter messages that are applicable for the given streamer
+ * Filter messages that are applicable for the given streamer with priority strategy:
+ *
+ * 1. First try: messages specifically for this streamer
+ * 2. Fallback: messages with no streamer restriction (generic)
+ *
+ * This ensures streamer-specific messages are used exclusively when available.
  */
 export function filterMessagesForStreamer(
   messages: MessageConfig[],
   streamerName: string,
 ): MessageConfig[] {
-  return messages.filter((msg) => {
-    // If no streamers specified (empty array), message applies to all
+  // Try to find streamer-specific messages first
+  const streamerSpecificMessages = messages.filter((msg) => {
     if (msg.streamers.length === 0) {
-      return true;
+      return false; // Will be used as fallback
     }
 
     // Check if streamer is in the allowed list (case-insensitive)
@@ -18,6 +23,14 @@ export function filterMessagesForStreamer(
       (s) => s.toLowerCase() === streamerName.toLowerCase(),
     );
   });
+
+  // If we found streamer-specific messages, use them exclusively
+  if (streamerSpecificMessages.length > 0) {
+    return streamerSpecificMessages;
+  }
+
+  // Fallback: use generic messages (no streamer restriction)
+  return messages.filter((msg) => msg.streamers.length === 0);
 }
 
 /**

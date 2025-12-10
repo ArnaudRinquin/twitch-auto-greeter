@@ -21,17 +21,17 @@ describe('message-selector', () => {
       expect(result).toEqual(messages);
     });
 
-    it('should filter messages for specific streamer', () => {
+    it('should prioritize streamer-specific messages over generic', () => {
       const messages: MessageConfig[] = [
         { text: 'Hi!', streamers: ['streamer1'], languages: [] },
         { text: 'Hello!', streamers: ['streamer2'], languages: [] },
-        { text: 'Hey!', streamers: [], languages: [] }, // No restriction
+        { text: 'Hey!', streamers: [], languages: [] }, // Generic
       ];
 
       const result = filterMessagesForStreamer(messages, 'streamer1');
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(1);
       expect(result).toContainEqual({ text: 'Hi!', streamers: ['streamer1'], languages: [] });
-      expect(result).toContainEqual({ text: 'Hey!', streamers: [], languages: [] });
+      // Generic message should NOT be included when streamer-specific exists
     });
 
     it('should be case-insensitive', () => {
@@ -43,7 +43,18 @@ describe('message-selector', () => {
       expect(result).toHaveLength(1);
     });
 
-    it('should return empty array when no messages match', () => {
+    it('should fallback to generic messages when no streamer-specific match', () => {
+      const messages: MessageConfig[] = [
+        { text: 'Hi!', streamers: ['other'], languages: [] },
+        { text: 'Generic', streamers: [], languages: [] },
+      ];
+
+      const result = filterMessagesForStreamer(messages, 'teststreamer');
+      expect(result).toHaveLength(1);
+      expect(result).toContainEqual({ text: 'Generic', streamers: [], languages: [] });
+    });
+
+    it('should return empty array when no messages match at all', () => {
       const messages: MessageConfig[] = [
         { text: 'Hi!', streamers: ['other'], languages: [] },
       ];
