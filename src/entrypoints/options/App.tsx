@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Config, MessageConfig, State } from '../../types';
 import { getConfig, setConfig, getState } from '../../core/storage';
 import { getAllSupportedLanguages } from '../../core/language-detector';
 import { loadEmotes, renderMessageWithEmotes } from '../../utils/emote-renderer';
+import { filterMessagesForStreamer, filterMessagesByLanguage } from '../../core/message-selector';
 import '../../globals.css';
 
 function App() {
@@ -16,6 +17,8 @@ function App() {
   const [newDisabledStreamer, setNewDisabledStreamer] = useState('');
   const [availableLanguages] = useState(getAllSupportedLanguages());
   const [emotesLoaded, setEmotesLoaded] = useState(false);
+  const [filterStreamer, setFilterStreamer] = useState<string>('');
+  const [filterLanguages, setFilterLanguages] = useState<string[]>([]);
 
   useEffect(() => {
     loadData();
@@ -159,6 +162,45 @@ function App() {
     console.log('[App] Rendered HTML:', html);
     return <span dangerouslySetInnerHTML={{ __html: html }} />;
   }
+
+  // Extract unique streamers from messages
+  const uniqueStreamers = useMemo(() => {
+    if (!config) return [];
+    const streamers = new Set<string>();
+    config.messages.forEach((msg) => {
+      msg.streamers.forEach((s) => streamers.add(s));
+    });
+    return Array.from(streamers).sort();
+  }, [config]);
+
+  // Extract used languages from messages
+  const usedLanguages = useMemo(() => {
+    if (!config) return [];
+    const langs = new Set<string>();
+    config.messages.forEach((msg) => {
+      msg.languages.forEach((l) => langs.add(l));
+    });
+    return Array.from(langs).sort();
+  }, [config]);
+
+  // Filter messages based on selected filters
+  const filteredMessages = useMemo(() => {
+    if (!config) return [];
+
+    let filtered = config.messages;
+
+    // Apply streamer filter
+    if (filterStreamer) {
+      filtered = filterMessagesForStreamer(filtered, filterStreamer);
+    }
+
+    // Apply language filter
+    if (filterLanguages.length > 0) {
+      filtered = filterMessagesByLanguage(filtered, filterLanguages);
+    }
+
+    return filtered;
+  }, [config, filterStreamer, filterLanguages]);
 
 
   if (!config || !state) {
@@ -356,8 +398,72 @@ function App() {
           <div className="mb-8">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Messages</h2>
 
+            {/* Filters */}
+            <div className="mb-4 p-4 bg-gray-50 rounded-md">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Streamer Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Filter by Streamer
+                  </label>
+                  <select
+                    value={filterStreamer}
+                    onChange={(e) => setFilterStreamer(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    <option value="">All streamers</option>
+                    {uniqueStreamers.map((streamer) => (
+                      <option key={streamer} value={streamer}>
+                        {streamer}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Language Filter */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Filter by Languages
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {usedLanguages.map((code) => {
+                      const lang = availableLanguages.find((l) => l.code === code);
+                      const isSelected = filterLanguages.includes(code);
+                      return (
+                        <button
+                          key={code}
+                          onClick={() => {
+                            if (isSelected) {
+                              setFilterLanguages(filterLanguages.filter((l) => l !== code));
+                            } else {
+                              setFilterLanguages([...filterLanguages, code]);
+                            }
+                          }}
+                          className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                            isSelected
+                              ? 'bg-purple-600 text-white'
+                              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {lang ? lang.name : code}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Results count */}
+              <div className="mt-3 text-sm text-gray-600">
+                Showing {filteredMessages.length} of {config.messages.length} messages
+              </div>
+            </div>
+
             <div className="space-y-2 mb-4">
-              {config.messages.map((msg, index) => (
+              {filteredMessages.map((msg, index) => {
+                // Find original index for delete
+                const originalIndex = config.messages.indexOf(msg);
+                return (
                 <div
                   key={index}
                   className="flex items-center justify-between bg-gray-50 p-3 rounded-md"
@@ -395,13 +501,14 @@ function App() {
                     </div>
                   </div>
                   <button
-                    onClick={() => handleDeleteMessage(index)}
+                    onClick={() => handleDeleteMessage(originalIndex)}
                     className="text-red-600 hover:text-red-800 font-medium"
                   >
                     Delete
                   </button>
                 </div>
-              ))}
+              );
+              })}
             </div>
 
             <div className="border-t pt-4">
