@@ -48,58 +48,55 @@ export const DEFAULT_CONFIG: Config = {
   enabled: true,
   messages: [
     // Global messages (no language restriction)
-    { text: 'HeyGuys', streamers: [], languages: [] },
-    { text: 'o/', streamers: [], languages: [] },
+    { text: 'Hey <streamer>! HeyGuys', streamers: [], languages: [] },
+    { text: 'o/ chat', streamers: [], languages: [] },
     { text: 'VoHiYo', streamers: [], languages: [] },
-    { text: '<3', streamers: [], languages: [] },
-    { text: 'hey! HeyGuys', streamers: [], languages: [] },
-    { text: 'hello <3', streamers: [], languages: [] },
+    { text: 'Hey <streamer> and chat! <3', streamers: [], languages: [] },
 
-    // English
+    // English - mix of streamer/chat/both
     { text: 'Hey <streamer>! HeyGuys', streamers: [], languages: ['en'] },
-    { text: 'What\'s up <streamer>! VoHiYo', streamers: [], languages: ['en'] },
-    { text: 'Hey everyone! <3', streamers: [], languages: ['en'] },
-    { text: 'Yo <streamer>!', streamers: [], languages: ['en'] },
-    { text: 'Sup chat', streamers: [], languages: ['en'] },
-    { text: 'Waddup <streamer>', streamers: [], languages: ['en'] },
-    { text: 'Hey there! VoHiYo', streamers: [], languages: ['en'] },
-    { text: 'Hello hello HeyGuys', streamers: [], languages: ['en'] },
-    { text: 'Ayo!', streamers: [], languages: ['en'] },
+    { text: 'What\'s up chat! VoHiYo', streamers: [], languages: ['en'] },
+    { text: 'Yo <streamer>! <3', streamers: [], languages: ['en'] },
+    { text: 'Waddup everyone HeyGuys', streamers: [], languages: ['en'] },
+    { text: 'Heya <streamer> and chat! VoHiYo', streamers: [], languages: ['en'] },
     { text: 'Hi chat <3', streamers: [], languages: ['en'] },
-    { text: 'Heya <streamer> HeyGuys', streamers: [], languages: ['en'] },
+    { text: 'Hello <streamer>! HeyGuys', streamers: [], languages: ['en'] },
+    { text: 'Sup <streamer> VoHiYo', streamers: [], languages: ['en'] },
+    { text: 'Hey everyone! <3', streamers: [], languages: ['en'] },
 
-    // French
+    // French - mix of streamer/chat/both
     { text: 'Salut <streamer>! HeyGuys', streamers: [], languages: ['fr'] },
-    { text: 'Salut tout le monde! <3', streamers: [], languages: ['fr'] },
-    { text: 'Coucou! VoHiYo', streamers: [], languages: ['fr'] },
-    { text: 'Ça va <streamer>?', streamers: [], languages: ['fr'] },
+    { text: 'Coucou chat! VoHiYo', streamers: [], languages: ['fr'] },
+    { text: 'Ça va <streamer>? <3', streamers: [], languages: ['fr'] },
     { text: 'Yo le chat! HeyGuys', streamers: [], languages: ['fr'] },
-    { text: 'Wesh <3', streamers: [], languages: ['fr'] },
-    { text: 'Coucou chat VoHiYo', streamers: [], languages: ['fr'] },
+    { text: 'Salut <streamer> et le chat <3', streamers: [], languages: ['fr'] },
+    { text: 'Hey tout le monde VoHiYo', streamers: [], languages: ['fr'] },
 
-    // Spanish
+    // Spanish - mix of streamer/chat/both
     { text: 'Hola <streamer>! HeyGuys', streamers: [], languages: ['es'] },
-    { text: 'Qué tal chat! <3', streamers: [], languages: ['es'] },
-    { text: 'Buenas! VoHiYo', streamers: [], languages: ['es'] },
+    { text: 'Buenas chat! VoHiYo', streamers: [], languages: ['es'] },
+    { text: 'Qué pasa <streamer>! <3', streamers: [], languages: ['es'] },
     { text: 'Hola a todos HeyGuys', streamers: [], languages: ['es'] },
-    { text: 'Qué pasa <streamer>', streamers: [], languages: ['es'] },
-    { text: 'Saludos <3', streamers: [], languages: ['es'] },
+    { text: 'Saludos <streamer> y chat <3', streamers: [], languages: ['es'] },
 
-    // German
+    // German - mix of streamer/chat/both
     { text: 'Hallo <streamer>! HeyGuys', streamers: [], languages: ['de'] },
-    { text: 'Servus! VoHiYo', streamers: [], languages: ['de'] },
-    { text: 'Moin! <3', streamers: [], languages: ['de'] },
+    { text: 'Servus chat! VoHiYo', streamers: [], languages: ['de'] },
+    { text: 'Moin <streamer>! <3', streamers: [], languages: ['de'] },
     { text: 'Hey Leute HeyGuys', streamers: [], languages: ['de'] },
+    { text: 'Hallo <streamer> und chat VoHiYo', streamers: [], languages: ['de'] },
 
-    // Portuguese
+    // Portuguese - mix of streamer/chat/both
     { text: 'Opa <streamer>! HeyGuys', streamers: [], languages: ['pt'] },
     { text: 'Fala chat! <3', streamers: [], languages: ['pt'] },
-    { text: 'E aí galera VoHiYo', streamers: [], languages: ['pt'] },
-    { text: 'Salve HeyGuys', streamers: [], languages: ['pt'] },
+    { text: 'E aí <streamer> VoHiYo', streamers: [], languages: ['pt'] },
+    { text: 'Salve galera HeyGuys', streamers: [], languages: ['pt'] },
+    { text: 'Opa <streamer> e chat <3', streamers: [], languages: ['pt'] },
 
-    // Japanese
+    // Japanese - mix of streamer/chat/both
     { text: 'こんにちは <streamer>! HeyGuys', streamers: [], languages: ['ja'] },
     { text: 'よろしく！ VoHiYo', streamers: [], languages: ['ja'] },
+    { text: '<streamer> とみんな こんにちは <3', streamers: [], languages: ['ja'] },
   ],
   defaultFrequency: 86400000, // 24 hours
   delayRange: [10, 15], // 10-15 seconds

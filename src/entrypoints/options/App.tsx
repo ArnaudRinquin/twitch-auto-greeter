@@ -150,10 +150,16 @@ function App() {
 
   function renderMessage(text: string) {
     console.log('[App] renderMessage called with:', text);
-    const html = renderMessageWithEmotes(text);
+    // Replace <streamer> placeholder with styled version for preview
+    const previewText = text.replace(
+      /<streamer>/gi,
+      '<span class="font-bold text-purple-600 bg-purple-50 px-1 rounded">&lt;streamer&gt;</span>'
+    );
+    const html = renderMessageWithEmotes(previewText);
     console.log('[App] Rendered HTML:', html);
     return <span dangerouslySetInnerHTML={{ __html: html }} />;
   }
+
 
   if (!config || !state) {
     return (
@@ -357,17 +363,36 @@ function App() {
                   className="flex items-center justify-between bg-gray-50 p-3 rounded-md"
                 >
                   <div className="flex-1">
-                    <p className="font-medium">{renderMessage(msg.text)}</p>
-                    {msg.streamers.length > 0 && (
-                      <p className="text-sm text-gray-600">
-                        Streamers: {msg.streamers.join(', ')}
-                      </p>
-                    )}
-                    {msg.languages.length > 0 && (
-                      <p className="text-sm text-gray-600">
-                        Languages: {msg.languages.join(', ')}
-                      </p>
-                    )}
+                    <p className="font-medium mb-2">{renderMessage(msg.text)}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {msg.streamers.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {msg.streamers.map((streamer) => (
+                            <span
+                              key={streamer}
+                              className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded"
+                            >
+                              {streamer}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {msg.languages.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {msg.languages.map((code) => {
+                            const lang = availableLanguages.find(l => l.code === code);
+                            return (
+                              <span
+                                key={code}
+                                className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded"
+                              >
+                                {lang ? lang.name : code}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <button
                     onClick={() => handleDeleteMessage(index)}
