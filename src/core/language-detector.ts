@@ -111,6 +111,49 @@ export function detectStreamLanguages(): string[] {
 }
 
 /**
+ * Wait for language tags to appear on the page (async loaded by React).
+ *
+ * Uses MutationObserver to watch for tag elements appearing in the DOM.
+ * Resolves immediately if tags already exist, or after timeout if no tags found.
+ *
+ * @param timeoutMs Maximum time to wait in milliseconds (default 5000)
+ * @returns Promise<string[]> Array of detected language codes
+ */
+export function waitForLanguageTags(timeoutMs: number = 5000): Promise<string[]> {
+  return new Promise((resolve) => {
+    // Try immediate detection first
+    const immediate = detectStreamLanguages();
+    if (immediate.length > 0) {
+      resolve(immediate);
+      return;
+    }
+
+    // Set up timeout
+    const timeout = setTimeout(() => {
+      observer.disconnect();
+      // Return whatever we detected, even if empty
+      resolve(detectStreamLanguages());
+    }, timeoutMs);
+
+    // Watch for tag elements to appear
+    const observer = new MutationObserver(() => {
+      const detected = detectStreamLanguages();
+      if (detected.length > 0) {
+        clearTimeout(timeout);
+        observer.disconnect();
+        resolve(detected);
+      }
+    });
+
+    // Observe the entire document for tag elements appearing
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  });
+}
+
+/**
  * Get the display name for a language code.
  * Used for UI display purposes.
  *

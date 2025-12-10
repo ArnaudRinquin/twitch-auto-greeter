@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import type { Config, MessageConfig, State } from '../../types';
 import { getConfig, setConfig, getState } from '../../core/storage';
 import { getAllSupportedLanguages } from '../../core/language-detector';
+import { EmoteFetcher, EmoteParser } from '@mkody/twitch-emoticons';
 import '../../globals.css';
 
 function App() {
@@ -14,10 +15,25 @@ function App() {
   const [newEnabledStreamer, setNewEnabledStreamer] = useState('');
   const [newDisabledStreamer, setNewDisabledStreamer] = useState('');
   const [availableLanguages] = useState(getAllSupportedLanguages());
+  const [emoteParser, setEmoteParser] = useState<EmoteParser | null>(null);
 
   useEffect(() => {
     loadData();
+    loadEmoteParser();
   }, []);
+
+  async function loadEmoteParser() {
+    try {
+      const fetcher = new EmoteFetcher();
+      const emotes = await fetcher.fetchTwitchEmotes();
+      const parser = new EmoteParser(emotes, {
+        template: '<img class="inline-block h-7 align-middle mx-0.5" src="{link}" alt="{code}">',
+      });
+      setEmoteParser(parser);
+    } catch (error) {
+      console.error('Failed to load emote parser:', error);
+    }
+  }
 
   async function loadData() {
     const cfg = await getConfig();
@@ -139,6 +155,15 @@ function App() {
       return `${hours}h ${minutes}m ago`;
     }
     return `${minutes}m ago`;
+  }
+
+  function renderMessageWithEmotes(text: string) {
+    if (!emoteParser) {
+      return <span>{text}</span>;
+    }
+
+    const html = emoteParser.parse(text);
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
   }
 
   if (!config || !state) {
@@ -343,7 +368,7 @@ function App() {
                   className="flex items-center justify-between bg-gray-50 p-3 rounded-md"
                 >
                   <div className="flex-1">
-                    <p className="font-medium">{msg.text}</p>
+                    <p className="font-medium">{renderMessageWithEmotes(msg.text)}</p>
                     {msg.streamers.length > 0 && (
                       <p className="text-sm text-gray-600">
                         Streamers: {msg.streamers.join(', ')}

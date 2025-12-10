@@ -10,7 +10,7 @@ export default defineContentScript({
     // Import core functions
     const { createStreamInfo, isManualNavigation, isStreamPage } =
       await import('../core/stream-detector');
-    const { detectStreamLanguages } = await import('../core/language-detector');
+    const { waitForLanguageTags } = await import('../core/language-detector');
 
     // Check current page on load
     checkAndGreetIfNeeded();
@@ -59,8 +59,8 @@ export default defineContentScript({
         return;
       }
 
-      // Detect language tags from the stream page
-      const languages = detectStreamLanguages();
+      // Wait for language tags to load (async rendered by React)
+      const languages = await waitForLanguageTags(5000);
 
       // Add languages to stream info
       streamInfo.languages = languages;
