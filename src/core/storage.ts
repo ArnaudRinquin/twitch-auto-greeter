@@ -112,3 +112,26 @@ export async function canSendMessage(
   const timeSinceLastMessage = Date.now() - lastTime;
   return timeSinceLastMessage >= frequencyMs;
 }
+
+/**
+ * Update the last message sent to a streamer
+ */
+export async function updateLastMessage(
+  streamerName: string,
+  message: string,
+): Promise<void> {
+  const state = await getState();
+  state.lastMessages[streamerName.toLowerCase()] = message;
+  await setState(state);
+}
+
+/**
+ * Clear history for a specific streamer
+ */
+export async function clearStreamerHistory(streamerName: string): Promise<void> {
+  const state = await getState();
+  const key = streamerName.toLowerCase();
+  delete state.lastMessageTimes[key];
+  delete state.lastMessages[key];
+  await setState(state);
+}

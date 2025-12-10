@@ -15,6 +15,7 @@ export interface Config {
 
 export interface State {
   lastMessageTimes: Record<string, number>; // streamer -> timestamp
+  lastMessages: Record<string, string>; // streamer -> last message sent
 }
 
 export interface StreamInfo {
@@ -106,4 +107,5 @@ export const DEFAULT_CONFIG: Config = {
 
 export const DEFAULT_STATE: State = {
   lastMessageTimes: {},
+  lastMessages: {},
 };

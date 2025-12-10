@@ -98,6 +98,7 @@ export default defineContentScript({
             await browser.runtime.sendMessage({
               type: 'GREETING_SENT',
               streamerName: response.streamerName,
+              sentMessage: response.message,
             });
           }
         }

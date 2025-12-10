@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Config, MessageConfig, State } from '../../types';
-import { getConfig, setConfig, getState } from '../../core/storage';
+import { getConfig, setConfig, getState, clearStreamerHistory } from '../../core/storage';
 import { getAllSupportedLanguages } from '../../core/language-detector';
 import { loadEmotes, renderMessageWithEmotes } from '../../utils/emote-renderer';
 import { filterMessagesForStreamer, filterMessagesByLanguage } from '../../core/message-selector';
@@ -138,6 +138,11 @@ function App() {
       ...config,
       disabledStreamers: config.disabledStreamers?.filter((s) => s !== streamer),
     });
+  }
+
+  async function handleClearStreamerHistory(streamerName: string) {
+    await clearStreamerHistory(streamerName);
+    loadData();
   }
 
   function formatLastSeen(timestamp: number) {
@@ -600,17 +605,36 @@ function App() {
               <div className="space-y-2">
                 {Object.entries(state.lastMessageTimes)
                   .sort(([, a], [, b]) => b - a)
-                  .map(([streamer, timestamp]) => (
-                    <div
-                      key={streamer}
-                      className="flex items-center justify-between bg-gray-50 p-3 rounded-md"
-                    >
-                      <span className="font-medium">{streamer}</span>
-                      <span className="text-sm text-gray-600">
-                        {formatLastSeen(timestamp)}
-                      </span>
-                    </div>
-                  ))}
+                  .map(([streamer, timestamp]) => {
+                    const lastMessage = state.lastMessages?.[streamer];
+                    return (
+                      <div
+                        key={streamer}
+                        className="bg-gray-50 p-3 rounded-md"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{streamer}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">
+                              {formatLastSeen(timestamp)}
+                            </span>
+                            <button
+                              onClick={() => handleClearStreamerHistory(streamer)}
+                              className="px-2 py-1 text-xs text-red-600 hover:text-red-800 hover:bg-red-50 rounded"
+                              title="Clear history for this streamer"
+                            >
+                              Clear
+                            </button>
+                          </div>
+                        </div>
+                        {lastMessage && (
+                          <div className="mt-2 text-sm text-gray-700 bg-white p-2 rounded border border-gray-200">
+                            {renderMessage(lastMessage)}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
               </div>
             )}
           </div>

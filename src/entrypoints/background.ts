@@ -131,11 +131,12 @@ async function handleGreetingRequest(request: any) {
 }
 
 async function handleGreetingSent(message: any) {
-  const { updateLastMessageTime } = await import('../core/storage');
-  const { streamerName } = message;
+  const { updateLastMessageTime, updateLastMessage } = await import('../core/storage');
+  const { streamerName, sentMessage } = message;
 
-  console.log(`[Background] Confirming greeting sent to ${streamerName}`);
+  console.log(`[Background] Confirming greeting sent to ${streamerName}: "${sentMessage}"`);
   await updateLastMessageTime(streamerName);
+  await updateLastMessage(streamerName, sentMessage);
 
   return { success: true };
 }
