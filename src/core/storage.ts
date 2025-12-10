@@ -7,6 +7,24 @@ const STORAGE_KEYS = {
 } as const;
 
 /**
+ * Migrate old config format to new format with mandatory arrays
+ */
+function migrateConfig(config: any): Config {
+  const migrated = { ...config };
+
+  // Ensure messages have streamers and languages arrays
+  if (migrated.messages) {
+    migrated.messages = migrated.messages.map((msg: any) => ({
+      ...msg,
+      streamers: msg.streamers || [],
+      languages: msg.languages || [],
+    }));
+  }
+
+  return migrated as Config;
+}
+
+/**
  * Get the current configuration from storage
  */
 export async function getConfig(): Promise<Config> {
@@ -16,7 +34,10 @@ export async function getConfig(): Promise<Config> {
   }
 
   const result = await chrome.storage.local.get(STORAGE_KEYS.CONFIG);
-  return result[STORAGE_KEYS.CONFIG] || { ...DEFAULT_CONFIG };
+  const rawConfig = result[STORAGE_KEYS.CONFIG] || { ...DEFAULT_CONFIG };
+
+  // Migrate config to ensure backward compatibility
+  return migrateConfig(rawConfig);
 }
 
 /**

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   filterMessagesForStreamer,
+  filterMessagesByLanguage,
   selectRandomMessage,
   interpolateMessage,
   getMessageForStreamer,
@@ -12,8 +13,8 @@ describe('message-selector', () => {
   describe('filterMessagesForStreamer', () => {
     it('should return all messages when no streamers are specified', () => {
       const messages: MessageConfig[] = [
-        { text: 'Hi!' },
-        { text: 'Hello!' },
+        { text: 'Hi!', streamers: [], languages: [] },
+        { text: 'Hello!', streamers: [], languages: [] },
       ];
 
       const result = filterMessagesForStreamer(messages, 'teststreamer');
@@ -22,20 +23,20 @@ describe('message-selector', () => {
 
     it('should filter messages for specific streamer', () => {
       const messages: MessageConfig[] = [
-        { text: 'Hi!', streamers: ['streamer1'] },
-        { text: 'Hello!', streamers: ['streamer2'] },
-        { text: 'Hey!' }, // No restriction
+        { text: 'Hi!', streamers: ['streamer1'], languages: [] },
+        { text: 'Hello!', streamers: ['streamer2'], languages: [] },
+        { text: 'Hey!', streamers: [], languages: [] }, // No restriction
       ];
 
       const result = filterMessagesForStreamer(messages, 'streamer1');
       expect(result).toHaveLength(2);
-      expect(result).toContainEqual({ text: 'Hi!', streamers: ['streamer1'] });
-      expect(result).toContainEqual({ text: 'Hey!' });
+      expect(result).toContainEqual({ text: 'Hi!', streamers: ['streamer1'], languages: [] });
+      expect(result).toContainEqual({ text: 'Hey!', streamers: [], languages: [] });
     });
 
     it('should be case-insensitive', () => {
       const messages: MessageConfig[] = [
-        { text: 'Hi!', streamers: ['TestStreamer'] },
+        { text: 'Hi!', streamers: ['TestStreamer'], languages: [] },
       ];
 
       const result = filterMessagesForStreamer(messages, 'teststreamer');
@@ -44,11 +45,72 @@ describe('message-selector', () => {
 
     it('should return empty array when no messages match', () => {
       const messages: MessageConfig[] = [
-        { text: 'Hi!', streamers: ['other'] },
+        { text: 'Hi!', streamers: ['other'], languages: [] },
       ];
 
       const result = filterMessagesForStreamer(messages, 'teststreamer');
       expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('filterMessagesByLanguage', () => {
+    it('should return only language-agnostic messages when stream has no languages', () => {
+      const messages: MessageConfig[] = [
+        { text: 'Hi!', streamers: [], languages: [] },
+        { text: 'Bonjour!', streamers: [], languages: ['fr'] },
+        { text: 'Hello!', streamers: [], languages: ['en'] },
+      ];
+
+      const result = filterMessagesByLanguage(messages, []);
+      expect(result).toHaveLength(1);
+      expect(result).toContainEqual({ text: 'Hi!', streamers: [], languages: [] });
+    });
+
+    it('should return messages with matching languages (ANY match)', () => {
+      const messages: MessageConfig[] = [
+        { text: 'Bonjour!', streamers: [], languages: ['fr'] },
+        { text: 'Hello!', streamers: [], languages: ['en'] },
+        { text: 'Hola!', streamers: [], languages: ['es'] },
+        { text: 'Hi!', streamers: [], languages: [] },
+      ];
+
+      const result = filterMessagesByLanguage(messages, ['en', 'de']);
+      expect(result).toHaveLength(1);
+      expect(result).toContainEqual({ text: 'Hello!', streamers: [], languages: ['en'] });
+    });
+
+    it('should match ANY language in message to stream languages', () => {
+      const messages: MessageConfig[] = [
+        { text: 'EN+FR', streamers: [], languages: ['en', 'fr'] },
+        { text: 'ES', streamers: [], languages: ['es'] },
+      ];
+
+      const result = filterMessagesByLanguage(messages, ['en', 'de']);
+      expect(result).toHaveLength(1);
+      expect(result[0].text).toBe('EN+FR'); // Matches because 'en' is common
+    });
+
+    it('should fallback to language-agnostic messages if no language match', () => {
+      const messages: MessageConfig[] = [
+        { text: 'FR', streamers: [], languages: ['fr'] },
+        { text: 'ES', streamers: [], languages: ['es'] },
+        { text: 'Any', streamers: [], languages: [] },
+      ];
+
+      const result = filterMessagesByLanguage(messages, ['en', 'de']);
+      expect(result).toHaveLength(1);
+      expect(result[0].text).toBe('Any');
+    });
+
+    it('should prefer language-specific over language-agnostic when match exists', () => {
+      const messages: MessageConfig[] = [
+        { text: 'Any', streamers: [], languages: [] },
+        { text: 'FR', streamers: [], languages: ['fr'] },
+      ];
+
+      const result = filterMessagesByLanguage(messages, ['fr']);
+      expect(result).toHaveLength(1);
+      expect(result[0].text).toBe('FR');
     });
   });
 
@@ -59,16 +121,16 @@ describe('message-selector', () => {
     });
 
     it('should return the only message when array has one element', () => {
-      const messages: MessageConfig[] = [{ text: 'Hi!' }];
+      const messages: MessageConfig[] = [{ text: 'Hi!', streamers: [], languages: [] }];
       const result = selectRandomMessage(messages);
-      expect(result).toEqual({ text: 'Hi!' });
+      expect(result).toEqual({ text: 'Hi!', streamers: [], languages: [] });
     });
 
     it('should return one of the messages', () => {
       const messages: MessageConfig[] = [
-        { text: 'Hi!' },
-        { text: 'Hello!' },
-        { text: 'Hey!' },
+        { text: 'Hi!', streamers: [], languages: [] },
+        { text: 'Hello!', streamers: [], languages: [] },
+        { text: 'Hey!', streamers: [], languages: [] },
       ];
 
       const result = selectRandomMessage(messages);
@@ -106,7 +168,7 @@ describe('message-selector', () => {
   describe('getMessageForStreamer', () => {
     it('should return null when no messages match', () => {
       const messages: MessageConfig[] = [
-        { text: 'Hi!', streamers: ['other'] },
+        { text: 'Hi!', streamers: ['other'], languages: [] },
       ];
 
       const result = getMessageForStreamer(messages, 'teststreamer');
@@ -115,7 +177,7 @@ describe('message-selector', () => {
 
     it('should return interpolated message for streamer', () => {
       const messages: MessageConfig[] = [
-        { text: 'Hi <streamer>!' },
+        { text: 'Hi <streamer>!', streamers: [], languages: [] },
       ];
 
       const result = getMessageForStreamer(messages, 'TestStreamer');
@@ -124,12 +186,43 @@ describe('message-selector', () => {
 
     it('should filter and interpolate correctly', () => {
       const messages: MessageConfig[] = [
-        { text: 'Wrong', streamers: ['other'] },
-        { text: 'Hi <streamer>!', streamers: ['teststreamer'] },
+        { text: 'Wrong', streamers: ['other'], languages: [] },
+        { text: 'Hi <streamer>!', streamers: ['teststreamer'], languages: [] },
       ];
 
       const result = getMessageForStreamer(messages, 'teststreamer');
       expect(result).toBe('Hi teststreamer!');
+    });
+
+    it('should filter by both streamer and language', () => {
+      const messages: MessageConfig[] = [
+        { text: 'Bonjour!', streamers: [], languages: ['fr'] },
+        { text: 'Hello!', streamers: [], languages: ['en'] },
+        { text: 'Hi!', streamers: [], languages: [] },
+      ];
+
+      const result = getMessageForStreamer(messages, 'teststreamer', ['en']);
+      expect(result).toBe('Hello!');
+    });
+
+    it('should fallback to language-agnostic when no language match', () => {
+      const messages: MessageConfig[] = [
+        { text: 'Bonjour!', streamers: [], languages: ['fr'] },
+        { text: 'Hi!', streamers: [], languages: [] },
+      ];
+
+      const result = getMessageForStreamer(messages, 'teststreamer', ['en']);
+      expect(result).toBe('Hi!');
+    });
+
+    it('should return null when stream has no languages and only language-specific messages exist', () => {
+      const messages: MessageConfig[] = [
+        { text: 'Bonjour!', streamers: [], languages: ['fr'] },
+        { text: 'Hello!', streamers: [], languages: ['en'] },
+      ];
+
+      const result = getMessageForStreamer(messages, 'teststreamer', []);
+      expect(result).toBeNull();
     });
   });
 

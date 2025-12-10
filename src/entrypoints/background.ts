@@ -54,9 +54,9 @@ async function handleGreetingRequest(request: any) {
   );
 
   const { streamInfo } = request;
-  const { streamerName } = streamInfo;
+  const { streamerName, languages } = streamInfo;
 
-  console.log(`[Background] Processing greeting request for ${streamerName}`);
+  console.log(`[Background] Processing greeting request for ${streamerName}, languages: ${languages?.join(', ') || 'none'}`);
 
   // Get configuration
   const config = await getConfig();
@@ -101,14 +101,14 @@ async function handleGreetingRequest(request: any) {
     };
   }
 
-  // Get appropriate message for this streamer
-  const message = getMessageForStreamer(config.messages, streamerName);
+  // Get appropriate message for this streamer and language
+  const message = getMessageForStreamer(config.messages, streamerName, languages || []);
 
   if (!message) {
-    console.log(`[Background] No applicable messages for ${streamerName}`);
+    console.log(`[Background] No applicable messages for ${streamerName} with languages ${languages?.join(', ') || 'none'}`);
     return {
       type: 'GREETING_RESPONSE',
-      error: 'No applicable messages for this streamer',
+      error: 'No applicable messages for this streamer and language combination',
     };
   }
 

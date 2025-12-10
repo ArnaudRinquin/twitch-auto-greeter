@@ -8,8 +8,8 @@ export function filterMessagesForStreamer(
   streamerName: string,
 ): MessageConfig[] {
   return messages.filter((msg) => {
-    // If no streamers specified, message applies to all
-    if (!msg.streamers || msg.streamers.length === 0) {
+    // If no streamers specified (empty array), message applies to all
+    if (msg.streamers.length === 0) {
       return true;
     }
 
@@ -18,6 +18,49 @@ export function filterMessagesForStreamer(
       (s) => s.toLowerCase() === streamerName.toLowerCase(),
     );
   });
+}
+
+/**
+ * Filter messages by language with fallback strategy:
+ *
+ * 1. If stream has language tags:
+ *    - First try: messages with ANY matching language (OR logic)
+ *      e.g., msg['en','fr'] matches stream['en','de'] because 'en' is common
+ *    - Fallback: messages with empty languages[] (language-agnostic)
+ *
+ * 2. If stream has NO language tags:
+ *    - Use only messages with empty languages[] (avoid language-specific msgs)
+ *
+ * @param messages Messages to filter
+ * @param streamLanguages ISO language codes from stream tags (e.g., ['en', 'fr'])
+ * @returns Filtered messages
+ */
+export function filterMessagesByLanguage(
+  messages: MessageConfig[],
+  streamLanguages: string[],
+): MessageConfig[] {
+  // If stream has no language tags, use only language-agnostic messages
+  if (streamLanguages.length === 0) {
+    return messages.filter((msg) => msg.languages.length === 0);
+  }
+
+  // Try to find messages with matching languages (ANY match - OR logic)
+  const languageSpecificMessages = messages.filter((msg) => {
+    if (msg.languages.length === 0) {
+      return false; // Will be used as fallback
+    }
+
+    // Check if ANY message language matches ANY stream language
+    return msg.languages.some((lang) => streamLanguages.includes(lang));
+  });
+
+  // If we found language-specific matches, use them
+  if (languageSpecificMessages.length > 0) {
+    return languageSpecificMessages;
+  }
+
+  // Fallback: use language-agnostic messages
+  return messages.filter((msg) => msg.languages.length === 0);
 }
 
 /**
@@ -40,17 +83,25 @@ export function interpolateMessage(messageText: string, streamerName: string): s
 }
 
 /**
- * Main function: select an appropriate message for the given streamer
+ * Main function: select an appropriate message for the given streamer and language
  */
 export function getMessageForStreamer(
   messages: MessageConfig[],
   streamerName: string,
+  streamLanguages: string[] = [],
 ): string | null {
-  // Filter messages for this streamer
-  const applicableMessages = filterMessagesForStreamer(messages, streamerName);
+  // Filter by streamer first
+  let applicableMessages = filterMessagesForStreamer(messages, streamerName);
 
   if (applicableMessages.length === 0) {
     return null; // No messages available for this streamer
+  }
+
+  // Then filter by language
+  applicableMessages = filterMessagesByLanguage(applicableMessages, streamLanguages);
+
+  if (applicableMessages.length === 0) {
+    return null; // No messages available for this language combination
   }
 
   // Select random message

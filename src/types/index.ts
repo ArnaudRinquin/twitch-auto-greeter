@@ -1,6 +1,7 @@
 export interface MessageConfig {
   text: string; // Can include <streamer> placeholder
-  streamers?: string[]; // Empty/undefined = all streamers
+  streamers: string[]; // Empty array = all streamers
+  languages: string[]; // ISO language codes (e.g., ['en', 'fr']); empty array = all languages
 }
 
 export interface Config {
@@ -20,6 +21,7 @@ export interface StreamInfo {
   streamerName: string;
   url: string;
   timestamp: number;
+  languages: string[]; // ISO language codes detected from stream tags
 }
 
 export interface GreetingRequest {
@@ -45,8 +47,8 @@ export type Message = GreetingRequest | GreetingResponse | GreetingConfirmation;
 export const DEFAULT_CONFIG: Config = {
   enabled: true,
   messages: [
-    { text: 'Hi <streamer>!' },
-    { text: 'Hey everyone!' },
+    { text: 'Hi <streamer>!', streamers: [], languages: [] },
+    { text: 'Hey everyone!', streamers: [], languages: [] },
   ],
   defaultFrequency: 86400000, // 24 hours
   delayRange: [10, 15], // 10-15 seconds

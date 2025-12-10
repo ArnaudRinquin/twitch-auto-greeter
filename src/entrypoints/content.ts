@@ -10,6 +10,7 @@ export default defineContentScript({
     // Import core functions
     const { createStreamInfo, isManualNavigation, isStreamPage } =
       await import('../core/stream-detector');
+    const { detectStreamLanguages } = await import('../core/language-detector');
 
     // Check current page on load
     checkAndGreetIfNeeded();
@@ -58,8 +59,14 @@ export default defineContentScript({
         return;
       }
 
+      // Detect language tags from the stream page
+      const languages = detectStreamLanguages();
+
+      // Add languages to stream info
+      streamInfo.languages = languages;
+
       console.log(
-        `[Content] On stream page: ${streamInfo.streamerName}`,
+        `[Content] On stream page: ${streamInfo.streamerName}, languages: ${languages.join(', ') || 'none'}`,
       );
 
       greetingInProgress = true;

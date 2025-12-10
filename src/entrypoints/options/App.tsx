@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Config, MessageConfig, State } from '../../types';
 import { getConfig, setConfig, getState } from '../../core/storage';
+import { getAllSupportedLanguages } from '../../core/language-detector';
 import '../../globals.css';
 
 function App() {
@@ -9,8 +10,10 @@ function App() {
   const [state, setState] = useState<State | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [newMessageStreamers, setNewMessageStreamers] = useState('');
+  const [newMessageLanguages, setNewMessageLanguages] = useState<string[]>([]);
   const [newEnabledStreamer, setNewEnabledStreamer] = useState('');
   const [newDisabledStreamer, setNewDisabledStreamer] = useState('');
+  const [availableLanguages] = useState(getAllSupportedLanguages());
 
   useEffect(() => {
     loadData();
@@ -43,7 +46,8 @@ function App() {
 
     const message: MessageConfig = {
       text: newMessage.trim(),
-      streamers: streamers.length > 0 ? streamers : undefined,
+      streamers,
+      languages: newMessageLanguages,
     };
 
     saveConfig({
@@ -53,6 +57,13 @@ function App() {
 
     setNewMessage('');
     setNewMessageStreamers('');
+    setNewMessageLanguages([]);
+  }
+
+  function handleToggleLanguage(code: string) {
+    setNewMessageLanguages((prev) =>
+      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
+    );
   }
 
   function handleDeleteMessage(index: number) {
@@ -331,11 +342,16 @@ function App() {
                   key={index}
                   className="flex items-center justify-between bg-gray-50 p-3 rounded-md"
                 >
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">{msg.text}</p>
-                    {msg.streamers && msg.streamers.length > 0 && (
+                    {msg.streamers.length > 0 && (
                       <p className="text-sm text-gray-600">
-                        Only for: {msg.streamers.join(', ')}
+                        Streamers: {msg.streamers.join(', ')}
+                      </p>
+                    )}
+                    {msg.languages.length > 0 && (
+                      <p className="text-sm text-gray-600">
+                        Languages: {msg.languages.join(', ')}
                       </p>
                     )}
                   </div>
@@ -371,6 +387,41 @@ function App() {
                     onChange={(e) => setNewMessageStreamers(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Languages (leave empty for all)
+                  </label>
+                  <div className="max-h-40 overflow-y-auto border border-gray-300 rounded-md p-2 bg-white">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {availableLanguages.slice(0, 18).map(({ code, name }) => (
+                        <label
+                          key={code}
+                          className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={newMessageLanguages.includes(code)}
+                            onChange={() => handleToggleLanguage(code)}
+                            className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                          />
+                          <span className="text-sm">{name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  {newMessageLanguages.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {newMessageLanguages.map((code) => (
+                        <span
+                          key={code}
+                          className="inline-flex items-center px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded"
+                        >
+                          {code}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <button
                   onClick={handleAddMessage}
