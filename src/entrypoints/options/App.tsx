@@ -142,7 +142,7 @@ function App() {
 
   async function handleClearStreamerHistory(streamerName: string) {
     await clearStreamerHistory(streamerName);
-    loadData();
+    await loadData();
   }
 
   function formatLastSeen(timestamp: number) {
