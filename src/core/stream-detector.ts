@@ -10,8 +10,8 @@ export function extractStreamerName(url: string): string | null {
   try {
     const urlObj = new URL(url);
 
-    // Check if it's a Twitch domain
-    if (!urlObj.hostname.includes('twitch.tv')) {
+    // Check if it's a Twitch domain or localhost (for testing)
+    if (!urlObj.hostname.includes('twitch.tv') && !urlObj.hostname.includes('localhost')) {
       return null;
     }
 

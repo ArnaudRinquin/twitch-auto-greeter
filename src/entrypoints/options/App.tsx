@@ -75,7 +75,7 @@ function App() {
   async function handleClearHistory() {
     if (!state) return;
     const newState = { ...state, lastMessageTimes: {} };
-    await browser.storage.local.set({ state: newState });
+    await chrome.storage.local.set({ state: newState });
     setState(newState);
   }
 

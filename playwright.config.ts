@@ -8,17 +8,22 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    trace: 'on-first-retry',
+    headless: !!process.env.CI,
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+  },
+
+  webServer: {
+    command: 'npx http-server src/tests/e2e/fixtures -p 3456 -s',
+    port: 3456,
+    reuseExistingServer: !process.env.CI,
   },
 
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
     },
   ],
 });

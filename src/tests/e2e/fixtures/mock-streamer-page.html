@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mock Twitch Stream - StreamerName</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0e0e10;
+      color: #efeff1;
+      margin: 0;
+      padding: 20px;
+    }
+    .chat-container {
+      max-width: 400px;
+      margin: 20px auto;
+      background: #18181b;
+      padding: 20px;
+      border-radius: 4px;
+    }
+    .chat-input-container {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    [data-a-target="chat-input"] {
+      flex: 1;
+      min-height: 40px;
+      padding: 8px 12px;
+      background: #464649;
+      border: 1px solid #53535f;
+      border-radius: 4px;
+      color: #efeff1;
+      outline: none;
+    }
+    [data-a-target="chat-input"]:focus {
+      border-color: #9147ff;
+    }
+    [data-a-target="chat-send-button"] {
+      padding: 8px 16px;
+      background: #9147ff;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    [data-a-target="chat-send-button"]:hover {
+      background: #772ce8;
+    }
+    #messages {
+      margin-top: 20px;
+      padding: 10px;
+      background: #1f1f23;
+      border-radius: 4px;
+      min-height: 100px;
+    }
+    .message {
+      margin: 5px 0;
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Mock Twitch Stream</h1>
+  <p>Streamer: <strong id="streamer-name">streamername</strong></p>
+
+  <div class="chat-container">
+    <h2>Chat</h2>
+    <div class="chat-input-container">
+      <div
+        data-a-target="chat-input"
+        contenteditable="true"
+        role="textbox"
+        aria-label="Chat input"
+      ></div>
+      <button data-a-target="chat-send-button">Send</button>
+    </div>
+    <div id="messages"></div>
+  </div>
+
+  <script>
+    // Get streamer name from URL query parameter
+    const url = new URL(window.location.href);
+    const streamerName = url.searchParams.get('streamer') || 'streamername';
+    document.getElementById('streamer-name').textContent = streamerName;
+    document.title = `Mock Twitch Stream - ${streamerName}`;
+
+    // Update URL to mimic Twitch structure for extension detection
+    if (window.history && window.history.replaceState) {
+      const twitchLikeUrl = `http://localhost:3456/${streamerName}`;
+      window.history.replaceState({}, '', twitchLikeUrl);
+    }
+
+    // Handle send button click
+    const input = document.querySelector('[data-a-target="chat-input"]');
+    const sendButton = document.querySelector('[data-a-target="chat-send-button"]');
+    const messagesContainer = document.getElementById('messages');
+
+    sendButton.addEventListener('click', () => {
+      const text = input.textContent.trim();
+      if (text) {
+        const message = document.createElement('div');
+        message.className = 'message';
+        message.textContent = text;
+        messagesContainer.appendChild(message);
+        input.textContent = '';
+      }
+    });
+
+    // Handle Enter key
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendButton.click();
+      }
+    });
+  </script>
+</body>
+</html>
