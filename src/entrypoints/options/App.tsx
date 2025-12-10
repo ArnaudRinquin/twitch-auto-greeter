@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import type { Config, MessageConfig, State } from '../../types';
 import { getConfig, setConfig, getState } from '../../core/storage';
 import { getAllSupportedLanguages } from '../../core/language-detector';
-import { EmoteFetcher, EmoteParser } from '@mkody/twitch-emoticons';
+import { loadEmotes, renderMessageWithEmotes } from '../../utils/emote-renderer';
 import '../../globals.css';
 
 function App() {
@@ -15,25 +15,16 @@ function App() {
   const [newEnabledStreamer, setNewEnabledStreamer] = useState('');
   const [newDisabledStreamer, setNewDisabledStreamer] = useState('');
   const [availableLanguages] = useState(getAllSupportedLanguages());
-  const [emoteParser, setEmoteParser] = useState<EmoteParser | null>(null);
+  const [emotesLoaded, setEmotesLoaded] = useState(false);
 
   useEffect(() => {
     loadData();
-    loadEmoteParser();
+    console.log('[App] Loading emotes...');
+    loadEmotes().then((loaded) => {
+      console.log('[App] Emotes loaded:', loaded);
+      setEmotesLoaded(loaded);
+    });
   }, []);
-
-  async function loadEmoteParser() {
-    try {
-      const fetcher = new EmoteFetcher();
-      const emotes = await fetcher.fetchTwitchEmotes();
-      const parser = new EmoteParser(emotes, {
-        template: '<img class="inline-block h-7 align-middle mx-0.5" src="{link}" alt="{code}">',
-      });
-      setEmoteParser(parser);
-    } catch (error) {
-      console.error('Failed to load emote parser:', error);
-    }
-  }
 
   async function loadData() {
     const cfg = await getConfig();
@@ -157,12 +148,10 @@ function App() {
     return `${minutes}m ago`;
   }
 
-  function renderMessageWithEmotes(text: string) {
-    if (!emoteParser) {
-      return <span>{text}</span>;
-    }
-
-    const html = emoteParser.parse(text);
+  function renderMessage(text: string) {
+    console.log('[App] renderMessage called with:', text);
+    const html = renderMessageWithEmotes(text);
+    console.log('[App] Rendered HTML:', html);
     return <span dangerouslySetInnerHTML={{ __html: html }} />;
   }
 
@@ -368,7 +357,7 @@ function App() {
                   className="flex items-center justify-between bg-gray-50 p-3 rounded-md"
                 >
                   <div className="flex-1">
-                    <p className="font-medium">{renderMessageWithEmotes(msg.text)}</p>
+                    <p className="font-medium">{renderMessage(msg.text)}</p>
                     {msg.streamers.length > 0 && (
                       <p className="text-sm text-gray-600">
                         Streamers: {msg.streamers.join(', ')}
