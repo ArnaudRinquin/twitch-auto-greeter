@@ -60,7 +60,14 @@ export async function getState(): Promise<State> {
   }
 
   const result = await chrome.storage.local.get(STORAGE_KEYS.STATE);
-  return result[STORAGE_KEYS.STATE] || { ...DEFAULT_STATE };
+  const state = result[STORAGE_KEYS.STATE] || { ...DEFAULT_STATE };
+
+  // Ensure lastMessages exists for backward compatibility
+  if (!state.lastMessages) {
+    state.lastMessages = {};
+  }
+
+  return state;
 }
 
 /**
@@ -132,6 +139,8 @@ export async function clearStreamerHistory(streamerName: string): Promise<void> 
   const state = await getState();
   const key = streamerName.toLowerCase();
   delete state.lastMessageTimes[key];
-  delete state.lastMessages[key];
+  if (state.lastMessages) {
+    delete state.lastMessages[key];
+  }
   await setState(state);
 }
