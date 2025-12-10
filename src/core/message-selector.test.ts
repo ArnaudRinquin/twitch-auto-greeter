@@ -186,26 +186,17 @@ describe('message-selector', () => {
       expect(result).toBeNull();
     });
 
-    it('should return interpolated message for streamer', () => {
+    it('should prioritize streamer-specific over language-specific', () => {
       const messages: MessageConfig[] = [
-        { text: 'Hi <streamer>!', streamers: [], languages: [] },
-      ];
-
-      const result = getMessageForStreamer(messages, 'TestStreamer');
-      expect(result).toBe('Hi TestStreamer!');
-    });
-
-    it('should filter and interpolate correctly', () => {
-      const messages: MessageConfig[] = [
-        { text: 'Wrong', streamers: ['other'], languages: [] },
+        { text: 'Bonjour!', streamers: [], languages: ['fr'] },
         { text: 'Hi <streamer>!', streamers: ['teststreamer'], languages: [] },
       ];
 
-      const result = getMessageForStreamer(messages, 'teststreamer');
+      const result = getMessageForStreamer(messages, 'teststreamer', ['fr']);
       expect(result).toBe('Hi teststreamer!');
     });
 
-    it('should filter by both streamer and language', () => {
+    it('should use language-specific when no streamer-specific exists', () => {
       const messages: MessageConfig[] = [
         { text: 'Bonjour!', streamers: [], languages: ['fr'] },
         { text: 'Hello!', streamers: [], languages: ['en'] },
@@ -216,7 +207,7 @@ describe('message-selector', () => {
       expect(result).toBe('Hello!');
     });
 
-    it('should fallback to language-agnostic when no language match', () => {
+    it('should fallback to global messages when no specific match', () => {
       const messages: MessageConfig[] = [
         { text: 'Bonjour!', streamers: [], languages: ['fr'] },
         { text: 'Hi!', streamers: [], languages: [] },
@@ -226,7 +217,7 @@ describe('message-selector', () => {
       expect(result).toBe('Hi!');
     });
 
-    it('should return null when stream has no languages and only language-specific messages exist', () => {
+    it('should return null when no global messages exist and no match found', () => {
       const messages: MessageConfig[] = [
         { text: 'Bonjour!', streamers: [], languages: ['fr'] },
         { text: 'Hello!', streamers: [], languages: ['en'] },
@@ -234,6 +225,15 @@ describe('message-selector', () => {
 
       const result = getMessageForStreamer(messages, 'teststreamer', []);
       expect(result).toBeNull();
+    });
+
+    it('should interpolate streamer name correctly', () => {
+      const messages: MessageConfig[] = [
+        { text: 'Hi <streamer>!', streamers: [], languages: [] },
+      ];
+
+      const result = getMessageForStreamer(messages, 'TestStreamer');
+      expect(result).toBe('Hi TestStreamer!');
     });
   });
 

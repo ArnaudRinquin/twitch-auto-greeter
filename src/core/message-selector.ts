@@ -97,35 +97,79 @@ export function interpolateMessage(messageText: string, streamerName: string): s
 
 /**
  * Main function: select an appropriate message for the given streamer and language
+ *
+ * Cascading priority:
+ * 1. Streamer-specific messages (if any exist)
+ * 2. Language-specific messages (if any exist)
+ * 3. Global messages (no restrictions)
  */
 export function getMessageForStreamer(
   messages: MessageConfig[],
   streamerName: string,
   streamLanguages: string[] = [],
 ): string | null {
-  // Filter by streamer first
-  let applicableMessages = filterMessagesForStreamer(messages, streamerName);
+  console.log(`[Message Selector] Total messages: ${messages.length}`);
+  console.log(`[Message Selector] Streamer: ${streamerName}, Languages: [${streamLanguages.join(', ')}]`);
 
-  if (applicableMessages.length === 0) {
-    return null; // No messages available for this streamer
+  // Step 1: Try streamer-specific messages
+  const streamerMessages = messages.filter((msg) =>
+    msg.streamers.length > 0 &&
+    msg.streamers.some((s) => s.toLowerCase() === streamerName.toLowerCase())
+  );
+
+  if (streamerMessages.length > 0) {
+    console.log(`[Message Selector] Found ${streamerMessages.length} streamer-specific messages`);
+    console.log('[Message Selector] Streamer messages:', streamerMessages.map(m => ({ text: m.text, streamers: m.streamers, languages: m.languages })));
+
+    const selected = selectRandomMessage(streamerMessages);
+    if (selected) {
+      const finalMessage = interpolateMessage(selected.text, streamerName);
+      console.log('[Message Selector] Selected streamer-specific:', finalMessage);
+      return finalMessage;
+    }
   }
 
-  // Then filter by language
-  applicableMessages = filterMessagesByLanguage(applicableMessages, streamLanguages);
+  // Step 2: Try language-specific messages (if stream has languages)
+  if (streamLanguages.length > 0) {
+    const languageMessages = messages.filter((msg) =>
+      msg.streamers.length === 0 && // Not streamer-specific
+      msg.languages.length > 0 &&
+      msg.languages.some((lang) => streamLanguages.includes(lang))
+    );
 
-  if (applicableMessages.length === 0) {
-    return null; // No messages available for this language combination
+    if (languageMessages.length > 0) {
+      console.log(`[Message Selector] Found ${languageMessages.length} language-specific messages`);
+      console.log('[Message Selector] Language messages:', languageMessages.map(m => ({ text: m.text, streamers: m.streamers, languages: m.languages })));
+
+      const selected = selectRandomMessage(languageMessages);
+      if (selected) {
+        const finalMessage = interpolateMessage(selected.text, streamerName);
+        console.log('[Message Selector] Selected language-specific:', finalMessage);
+        return finalMessage;
+      }
+    }
   }
 
-  // Select random message
-  const selectedMessage = selectRandomMessage(applicableMessages);
+  // Step 3: Fallback to global messages
+  const globalMessages = messages.filter((msg) =>
+    msg.streamers.length === 0 &&
+    msg.languages.length === 0
+  );
 
-  if (!selectedMessage) {
-    return null;
+  if (globalMessages.length > 0) {
+    console.log(`[Message Selector] Found ${globalMessages.length} global messages`);
+    console.log('[Message Selector] Global messages:', globalMessages.map(m => ({ text: m.text, streamers: m.streamers, languages: m.languages })));
+
+    const selected = selectRandomMessage(globalMessages);
+    if (selected) {
+      const finalMessage = interpolateMessage(selected.text, streamerName);
+      console.log('[Message Selector] Selected global:', finalMessage);
+      return finalMessage;
+    }
   }
 
-  // Interpolate and return
-  return interpolateMessage(selectedMessage.text, streamerName);
+  console.log('[Message Selector] No messages available');
+  return null;
 }
 
 /**
