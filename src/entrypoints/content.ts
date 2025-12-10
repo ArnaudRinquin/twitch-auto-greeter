@@ -1,5 +1,5 @@
 export default defineContentScript({
-  matches: ['*://*.twitch.tv/*', 'http://localhost:*/*'],
+  matches: ['*://*.twitch.tv/*'],
   async main() {
     console.log('[Twitch Auto-Greeter] Content script loaded');
 
