@@ -5,13 +5,16 @@ Twitch recently changed the way it counts spectators by only counting the ones s
 ## Features
 
 - **Smart Greeting**: Automatically sends a greeting message once per day (configurable) when you join a stream
+- **Language-Aware Messages**: Auto-detects stream language tags and uses appropriate greetings (English, French, Spanish, German, Portuguese, Japanese, and more)
 - **Customizable Messages**: Configure multiple greeting messages with `<streamer>` placeholder for personalization
+- **Emote Support**: Renders Twitch global emotes (HeyGuys, VoHiYo, etc.) and BetterTTV emotes in message previews
 - **Streamer-Specific Messages**: Restrict messages to specific streamers or use them globally
+- **Message Filtering**: Filter messages by streamer and language in the options page
 - **Whitelist/Blacklist**: Enable only for specific streamers or disable for certain ones
 - **Privacy-Focused**: All data stored locally, no external tracking
 - **Frequency Control**: Default 24h cooldown per streamer to avoid spam
 - **Natural Timing**: Random 10-15 second delay after joining a stream
-- **Greeting History**: View when you last greeted each streamer
+- **Greeting History**: View when you last greeted each streamer, see the exact message sent, and clear history per streamer
 
 ![Screenshot of settings](./screenshot_settings.png)
 
@@ -69,20 +72,32 @@ pnpm zip:firefox
 
 Access the extension options page via `chrome://extensions/` → "Options" to:
 - **Enable/disable** the auto-greeter
-- **Add custom greeting messages** with `<streamer>` placeholder
+- **Add custom greeting messages** with `<streamer>` placeholder and language tags
+- **Filter messages** by streamer and language to preview what will be sent
 - **Configure per-streamer messages** (optional streamer targeting)
 - **Whitelist streamers** (only enable for specific streamers)
 - **Blacklist streamers** (disable for specific streamers)
 - **Set greeting frequency** (default: 24 hours)
 - **Adjust delay timing** (default: 10-15 seconds)
-- **View greeting history** and clear it if needed
+- **View greeting history** with last sent message and clear per-streamer history
+
+## How It Works
+
+The extension uses a **cascading message selection** strategy:
+
+1. **Streamer-specific messages** take priority - if you've configured messages for a specific streamer, those are used exclusively
+2. **Language-specific messages** are next - the extension detects stream language tags and matches appropriate greetings
+3. **Global messages** as fallback - language-agnostic messages work on any stream
+
+Example: If you visit a French streamer with messages configured for both "French" and that streamer specifically, the streamer-specific message wins. If you visit an English stream without streamer-specific messages, an English greeting is automatically selected.
 
 ## Tech Stack
 
 - **WXT Framework**: Next-gen browser extension framework
 - **React + TypeScript**: UI components
 - **Tailwind CSS**: Styling
-- **Vitest + Playwright**: Testing
+- **Vitest + Playwright**: Testing (93 unit tests)
+- **BetterTTV API**: Emote rendering without authentication
 
 ## License
 
