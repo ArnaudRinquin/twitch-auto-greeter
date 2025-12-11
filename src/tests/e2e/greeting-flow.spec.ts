@@ -118,7 +118,7 @@ test.describe('Greeting Flow', () => {
     const streamerUrl = getMockStreamerUrl('teststreamer');
 
     await page.goto(streamerUrl);
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(4000);
 
     const chatText = await getChatInputText(page);
     expect(chatText).toBe(''); // No message when disabled
@@ -144,7 +144,7 @@ test.describe('Greeting Flow', () => {
     const streamerUrl = getMockStreamerUrl('bannedstreamer');
 
     await page.goto(streamerUrl);
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(4000);
 
     const chatText = await getChatInputText(page);
     expect(chatText).toBe(''); // No message for disabled streamer
@@ -169,14 +169,19 @@ test.describe('Greeting Flow', () => {
     // Test allowed streamer
     let page = await context.newPage();
     await page.goto(getMockStreamerUrl('allowedstreamer'));
-    let messageReceived = await waitForChatMessage(page, 'Hello', 5000);
+    let messageReceived = await waitForChatMessage(page, 'Hello', 10000);
     expect(messageReceived).toBe(true);
     await page.close();
+
+    // Clear lastMessageTimes before testing non-allowed streamer
+    await setExtensionStorage(context, extensionId, {
+      state: { lastMessageTimes: {} },
+    });
 
     // Test non-allowed streamer
     page = await context.newPage();
     await page.goto(getMockStreamerUrl('otherstreamer'));
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(4000);
     const chatText = await getChatInputText(page);
     expect(chatText).toBe(''); // No message for non-whitelisted streamer
     await page.close();

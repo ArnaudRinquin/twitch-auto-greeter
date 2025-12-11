@@ -29,9 +29,9 @@ test.describe('Options Page', () => {
     await expect(delayMinInput).toHaveValue('10');
     await expect(delayMaxInput).toHaveValue('15');
 
-    // Check default messages exist
-    const messages = page.locator('.bg-gray-50.p-3').filter({ hasText: /Hi|Hey/ });
-    await expect(messages).toHaveCount(2);
+    // Check default messages exist (DEFAULT_CONFIG has 37 messages)
+    const storage = await getExtensionStorage(context, extensionId);
+    expect(storage.config.messages.length).toBe(37);
 
     await page.close();
   });
@@ -102,8 +102,8 @@ test.describe('Options Page', () => {
     await page.waitForTimeout(500);
 
     const storage = await getExtensionStorage(context, extensionId);
-    expect(storage.config.messages).toHaveLength(3);
-    expect(storage.config.messages[2].text).toBe('Hello from test!');
+    expect(storage.config.messages).toHaveLength(38); // 37 default + 1 new
+    expect(storage.config.messages[37].text).toBe('Hello from test!');
 
     await page.close();
   });

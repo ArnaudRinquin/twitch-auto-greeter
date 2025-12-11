@@ -35,17 +35,21 @@ test.describe('Content Script', () => {
     await page.close();
   });
 
-  test('detects manual navigation to different streamer', async ({ context }) => {
+  test('detects manual navigation to different streamer', async ({ context, extensionId }) => {
     const page = await context.newPage();
 
     // Navigate to first streamer
     await page.goto(getMockStreamerUrl('streamer1'));
-    await page.waitForTimeout(2000); // Wait for greeting
+    await page.waitForTimeout(4000); // Wait for greeting (delay + typing)
 
-    // Clear chat
+    // Clear chat and lastMessageTimes
     await page.evaluate(() => {
       const input = document.querySelector('[data-a-target="chat-input"]');
       if (input) input.textContent = '';
+    });
+
+    await setExtensionStorage(context, extensionId, {
+      state: { lastMessageTimes: {} },
     });
 
     // Manually navigate to different streamer (wait >1s to simulate manual nav)
@@ -53,7 +57,7 @@ test.describe('Content Script', () => {
     await page.goto(getMockStreamerUrl('streamer2'));
 
     // Should trigger new greeting
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(4000);
     const chatText = await getChatInputText(page);
     expect(chatText.length).toBeGreaterThan(0);
 
@@ -65,7 +69,7 @@ test.describe('Content Script', () => {
 
     // Navigate to streamer
     await page.goto(getMockStreamerUrl('streamer1'));
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(4000);
 
     // Clear chat
     await page.evaluate(() => {
@@ -79,7 +83,7 @@ test.describe('Content Script', () => {
     await page.waitForTimeout(500);
     await page.goto(getMockStreamerUrl('streamer3'));
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(4000);
 
     // Should not send multiple greetings
     const chatText = await getChatInputText(page);
@@ -114,13 +118,13 @@ test.describe('Content Script', () => {
     await page.close();
   });
 
-  test('handles URLs with query parameters', async ({ context }) => {
+  test('handles URLs with query parameters', async ({ context, extensionId }) => {
     const page = await context.newPage();
 
     const urlWithParams = `${getMockStreamerUrl('teststreamer')}?param=value`;
     await page.goto(urlWithParams);
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(4000);
 
     const chatText = await getChatInputText(page);
     expect(chatText.length).toBeGreaterThan(0); // Should still detect streamer
@@ -128,13 +132,13 @@ test.describe('Content Script', () => {
     await page.close();
   });
 
-  test('handles URLs with trailing slashes', async ({ context }) => {
+  test('handles URLs with trailing slashes', async ({ context, extensionId }) => {
     const page = await context.newPage();
 
     const urlWithSlash = `${getMockStreamerUrl('teststreamer')}/`;
     await page.goto(urlWithSlash);
 
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(4000);
 
     const chatText = await getChatInputText(page);
     expect(chatText.length).toBeGreaterThan(0); // Should detect streamer
@@ -160,7 +164,7 @@ test.describe('Content Script', () => {
     await page.goto(getMockStreamerUrl('teststreamer'));
 
     // Verify content script is active by checking for greeting behavior
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(4000);
 
     const chatText = await getChatInputText(page);
     // If content script loaded, greeting should be sent
