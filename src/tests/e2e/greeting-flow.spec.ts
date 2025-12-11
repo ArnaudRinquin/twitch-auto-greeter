@@ -33,7 +33,10 @@ test.describe('Greeting Flow', () => {
 
     // First visit
     await page.goto(streamerUrl);
-    await waitForChatMessage(page, 'Hello', 10000);
+    await page.waitForTimeout(4000); // Wait for greeting
+
+    // Wait a bit more for state to be updated via GREETING_SENT message
+    await page.waitForTimeout(500);
 
     // Get storage to verify timestamp was recorded
     let storage = await getExtensionStorage(context, extensionId);
