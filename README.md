@@ -1,4 +1,4 @@
-# Twitch Auto-Greeter
+![Twitch Auto-Greeter](./store/promo/marquee-promo-tile.png)
 
 Twitch recently changed the way it counts spectators by only counting the ones speaking in the chat. This browser extension automates saying "Hi" in the chat to ensure you're counted as an active viewer.
 
