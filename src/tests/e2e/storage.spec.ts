@@ -29,7 +29,7 @@ test.describe('Storage Persistence', () => {
   test('persists config changes across page reloads', async ({ context, extensionId }) => {
     const customConfig: Config = {
       enabled: false,
-      messages: [{ text: 'Custom message' }],
+      messages: [{ text: 'Custom message', streamers: [], languages: [] }],
       defaultFrequency: 48 * 3600000,
       delayRange: [5, 10],
     };
@@ -53,14 +53,14 @@ test.describe('Storage Persistence', () => {
   test.skip('updates last message time after sending greeting', async ({ context, extensionId }) => {
     const config: Config = {
       enabled: true,
-      messages: [{ text: 'Hello!' }],
+      messages: [{ text: 'Hello!', streamers: [], languages: [] }],
       defaultFrequency: 24 * 3600000,
       delayRange: [1, 2],
     };
 
     await setExtensionStorage(context, extensionId, {
       config,
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
 
     const page = await context.newPage();
@@ -83,14 +83,14 @@ test.describe('Storage Persistence', () => {
   test.skip('maintains separate timestamps for different streamers', async ({ context, extensionId }) => {
     const config: Config = {
       enabled: true,
-      messages: [{ text: 'Hello!' }],
+      messages: [{ text: 'Hello!', streamers: [], languages: [] }],
       defaultFrequency: 24 * 3600000,
       delayRange: [1, 2],
     };
 
     await setExtensionStorage(context, extensionId, {
       config,
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
 
     // Visit first streamer
@@ -119,6 +119,7 @@ test.describe('Storage Persistence', () => {
         streamer2: Date.now() - 10000,
         streamer3: Date.now() - 100000,
       },
+      lastMessages: {},
     };
 
     await setExtensionStorage(context, extensionId, { state });
@@ -139,7 +140,7 @@ test.describe('Storage Persistence', () => {
   test('handles empty state gracefully', async ({ context, extensionId }) => {
     await setExtensionStorage(context, extensionId, {
       config: DEFAULT_CONFIG,
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
 
     const storage = await getExtensionStorage(context, extensionId);
@@ -171,7 +172,7 @@ test.describe('Storage Persistence', () => {
   test('preserves streamer list arrays in config', async ({ context, extensionId }) => {
     const config: Config = {
       enabled: true,
-      messages: [{ text: 'Hi!' }],
+      messages: [{ text: 'Hi!', streamers: [], languages: [] }],
       defaultFrequency: 24 * 3600000,
       delayRange: [10, 15],
       enabledStreamers: ['streamer1', 'streamer2'],
@@ -189,8 +190,8 @@ test.describe('Storage Persistence', () => {
     const config: Config = {
       enabled: true,
       messages: [
-        { text: 'Generic hello' },
-        { text: 'VIP greeting', streamers: ['vipstreamer', 'premiumstreamer'] },
+        { text: 'Generic hello', streamers: [], languages: [] },
+        { text: 'VIP greeting', streamers: ['vipstreamer', 'premiumstreamer'], languages: [] },
       ],
       defaultFrequency: 24 * 3600000,
       delayRange: [10, 15],

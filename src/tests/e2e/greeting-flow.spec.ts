@@ -14,8 +14,8 @@ test.describe('Greeting Flow', () => {
     const config: Config = {
       enabled: true,
       messages: [
-        { text: 'Hello!' },
-        { text: 'Hi <streamer>!' },
+        { text: 'Hello!', streamers: [], languages: [] },
+        { text: 'Hi <streamer>!', streamers: [], languages: [] },
       ],
       defaultFrequency: 24 * 3600000, // 24 hours in milliseconds
       delayRange: [1, 2], // Short delay for testing
@@ -23,7 +23,7 @@ test.describe('Greeting Flow', () => {
 
     await setExtensionStorage(context, extensionId, {
       config,
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
   });
 
@@ -46,14 +46,14 @@ test.describe('Greeting Flow', () => {
   test.skip('interpolates streamer name in message', async ({ context, extensionId }) => {
     const config: Config = {
       enabled: true,
-      messages: [{ text: 'Hello <streamer>!' }],
+      messages: [{ text: 'Hello <streamer>!', streamers: [], languages: [] }],
       defaultFrequency: 24 * 3600000,
       delayRange: [1, 2],
     };
 
     await setExtensionStorage(context, extensionId, {
       config,
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
 
     const page = await context.newPage();
@@ -104,14 +104,14 @@ test.describe('Greeting Flow', () => {
   test('respects disabled extension setting', async ({ context, extensionId }) => {
     const config: Config = {
       enabled: false, // Disabled
-      messages: [{ text: 'Hello!' }],
+      messages: [{ text: 'Hello!', streamers: [], languages: [] }],
       defaultFrequency: 24 * 3600000,
       delayRange: [1, 2],
     };
 
     await setExtensionStorage(context, extensionId, {
       config,
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
 
     const page = await context.newPage();
@@ -129,7 +129,7 @@ test.describe('Greeting Flow', () => {
   test('respects disabled streamers list', async ({ context, extensionId }) => {
     const config: Config = {
       enabled: true,
-      messages: [{ text: 'Hello!' }],
+      messages: [{ text: 'Hello!', streamers: [], languages: [] }],
       defaultFrequency: 24 * 3600000,
       delayRange: [1, 2],
       disabledStreamers: ['bannedstreamer'],
@@ -137,7 +137,7 @@ test.describe('Greeting Flow', () => {
 
     await setExtensionStorage(context, extensionId, {
       config,
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
 
     const page = await context.newPage();
@@ -155,7 +155,7 @@ test.describe('Greeting Flow', () => {
   test('respects enabled streamers list (whitelist)', async ({ context, extensionId }) => {
     const config: Config = {
       enabled: true,
-      messages: [{ text: 'Hello!' }],
+      messages: [{ text: 'Hello!', streamers: [], languages: [] }],
       defaultFrequency: 24 * 3600000,
       delayRange: [1, 2],
       enabledStreamers: ['allowedstreamer'],
@@ -163,7 +163,7 @@ test.describe('Greeting Flow', () => {
 
     await setExtensionStorage(context, extensionId, {
       config,
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
 
     // Test allowed streamer
@@ -175,7 +175,7 @@ test.describe('Greeting Flow', () => {
 
     // Clear lastMessageTimes before testing non-allowed streamer
     await setExtensionStorage(context, extensionId, {
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
 
     // Test non-allowed streamer
@@ -191,8 +191,8 @@ test.describe('Greeting Flow', () => {
     const config: Config = {
       enabled: true,
       messages: [
-        { text: 'Generic hello!' },
-        { text: 'Special greeting for VIP!', streamers: ['vipstreamer'] },
+        { text: 'Generic hello!', streamers: [], languages: [] },
+        { text: 'Special greeting for VIP!', streamers: ['vipstreamer'], languages: [] },
       ],
       defaultFrequency: 24 * 3600000,
       delayRange: [1, 2],
@@ -200,7 +200,7 @@ test.describe('Greeting Flow', () => {
 
     await setExtensionStorage(context, extensionId, {
       config,
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
 
     const page = await context.newPage();
@@ -242,14 +242,14 @@ test.describe('Greeting Flow', () => {
   test.skip('handles case-insensitive streamer names', async ({ context, extensionId }) => {
     const config: Config = {
       enabled: true,
-      messages: [{ text: 'Hello <streamer>!' }],
+      messages: [{ text: 'Hello <streamer>!', streamers: [], languages: [] }],
       defaultFrequency: 24 * 3600000,
       delayRange: [1, 2],
     };
 
     await setExtensionStorage(context, extensionId, {
       config,
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
 
     const page = await context.newPage();

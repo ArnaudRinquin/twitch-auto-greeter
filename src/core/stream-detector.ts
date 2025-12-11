@@ -56,6 +56,7 @@ export function createStreamInfo(url: string): StreamInfo | null {
     streamerName,
     url,
     timestamp: Date.now(),
+    languages: [], // Will be populated by content script after waiting for language tags
   };
 }
 

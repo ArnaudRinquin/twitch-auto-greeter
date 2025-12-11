@@ -11,14 +11,14 @@ test.describe('Content Script', () => {
   test.beforeEach(async ({ context, extensionId }) => {
     const config: Config = {
       enabled: true,
-      messages: [{ text: 'Test message' }],
+      messages: [{ text: 'Test message', streamers: [], languages: [] }],
       defaultFrequency: 24 * 3600000,
       delayRange: [1, 2],
     };
 
     await setExtensionStorage(context, extensionId, {
       config,
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
   });
 
@@ -49,7 +49,7 @@ test.describe('Content Script', () => {
     });
 
     await setExtensionStorage(context, extensionId, {
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
 
     // Manually navigate to different streamer (wait >1s to simulate manual nav)

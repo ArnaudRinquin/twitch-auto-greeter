@@ -7,7 +7,7 @@ test.describe('Options Page', () => {
     // Reset to default config before each test
     await setExtensionStorage(context, extensionId, {
       config: DEFAULT_CONFIG,
-      state: { lastMessageTimes: {} },
+      state: { lastMessageTimes: {}, lastMessages: {} },
     });
   });
 
@@ -184,6 +184,7 @@ test.describe('Options Page', () => {
           streamer1: Date.now(),
           streamer2: Date.now() - 1000000,
         },
+        lastMessages: {},
       },
     });
 
@@ -208,6 +209,7 @@ test.describe('Options Page', () => {
           streamer1: now,
           streamer2: now - 3600000, // 1 hour ago
         },
+        lastMessages: {},
       },
     });
 
