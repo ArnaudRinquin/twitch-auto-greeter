@@ -50,7 +50,7 @@ jobs:
         run: pnpm build
 
       - name: Run e2e tests
-        run: pnpm test:e2e:ci
+        run: xvfb-run pnpm test:e2e:ci
 
       - name: Upload test artifacts
         if: failure()

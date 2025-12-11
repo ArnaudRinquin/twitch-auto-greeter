@@ -12,7 +12,7 @@ export const test = base.extend<{
     const __dirname = path.dirname(__filename);
     const extensionPath = path.join(__dirname, '../../../..', '.output', 'chrome-mv3');
     const context = await chromium.launchPersistentContext('', {
-      headless: false, // Extensions require headed mode
+      headless: false, // Extensions require headed mode, use xvfb-run in CI
       args: [
         `--disable-extensions-except=${extensionPath}`,
         `--load-extension=${extensionPath}`,
