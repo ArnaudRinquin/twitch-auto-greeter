@@ -8,7 +8,7 @@ export default defineConfig({
   }),
   manifest: {
     name: 'Twitch Auto-Greeter',
-    description: 'Automatically say hi in Twitch chat to count as a spectator',
+    description: 'Automatically send greetings in Twitch chat to be counted as an active viewer. Language-aware, customizable, privacy-focused.',
     version: '0.1.0',
     permissions: ['storage', 'tabs'],
     host_permissions: ['*://*.twitch.tv/*'],
