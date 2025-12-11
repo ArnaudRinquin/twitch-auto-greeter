@@ -43,14 +43,14 @@ test.describe('Options Page', () => {
     const enabledToggle = page.getByRole('checkbox', { name: /enable auto-greeter/i });
 
     // Disable
-    await enabledToggle.uncheck();
+    await enabledToggle.click();
     await page.waitForTimeout(500); // Wait for storage update
 
     let storage = await getExtensionStorage(context, extensionId);
     expect(storage.config.enabled).toBe(false);
 
     // Re-enable
-    await enabledToggle.check();
+    await enabledToggle.click();
     await page.waitForTimeout(500);
 
     storage = await getExtensionStorage(context, extensionId);
