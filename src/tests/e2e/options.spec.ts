@@ -16,16 +16,16 @@ test.describe('Options Page', () => {
     await page.goto(`chrome-extension://${extensionId}/options.html`);
 
     // Check enabled toggle
-    const enabledToggle = page.locator('input[type="checkbox"]').first();
+    const enabledToggle = page.getByRole('checkbox', { name: /enable auto-greeter/i });
     await expect(enabledToggle).toBeChecked();
 
     // Check default frequency
-    const frequencyInput = page.locator('input[type="number"]').first();
+    const frequencyInput = page.getByLabel('Greeting Frequency (hours)');
     await expect(frequencyInput).toHaveValue('24');
 
     // Check default delay range
-    const delayMinInput = page.locator('input[type="number"]').nth(1);
-    const delayMaxInput = page.locator('input[type="number"]').nth(2);
+    const delayMinInput = page.getByLabel('Minimum delay in seconds');
+    const delayMaxInput = page.getByLabel('Maximum delay in seconds');
     await expect(delayMinInput).toHaveValue('10');
     await expect(delayMaxInput).toHaveValue('15');
 
@@ -36,11 +36,11 @@ test.describe('Options Page', () => {
     await page.close();
   });
 
-  test.skip('can toggle extension enabled/disabled', async ({ context, extensionId }) => {
+  test('can toggle extension enabled/disabled', async ({ context, extensionId }) => {
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html`);
 
-    const enabledToggle = page.locator('input[type="checkbox"]').first();
+    const enabledToggle = page.getByRole('checkbox', { name: /enable auto-greeter/i });
 
     // Disable
     await enabledToggle.uncheck();
@@ -63,7 +63,7 @@ test.describe('Options Page', () => {
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html`);
 
-    const frequencyInput = page.locator('input[type="number"]').first(); // First number input
+    const frequencyInput = page.getByLabel('Greeting Frequency (hours)');
     await frequencyInput.fill('48');
     await page.waitForTimeout(500);
 
@@ -77,8 +77,8 @@ test.describe('Options Page', () => {
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html`);
 
-    const delayMinInput = page.locator('input[type="number"]').nth(1); // Second number input (after frequency)
-    const delayMaxInput = page.locator('input[type="number"]').nth(2); // Third number input
+    const delayMinInput = page.getByLabel('Minimum delay in seconds');
+    const delayMaxInput = page.getByLabel('Maximum delay in seconds');
 
     await delayMinInput.fill('5');
     await delayMaxInput.fill('20');
@@ -94,7 +94,7 @@ test.describe('Options Page', () => {
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html`);
 
-    const newMessageInput = page.locator('input[placeholder*="Message text"]');
+    const newMessageInput = page.getByLabel('New message text');
     const addButton = page.getByRole('button', { name: /add message/i });
 
     await newMessageInput.fill('Hello from test!');
@@ -128,7 +128,7 @@ test.describe('Options Page', () => {
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html`);
 
-    const newMessageInput = page.locator('input[placeholder*="Message text"]');
+    const newMessageInput = page.getByLabel('New message text');
     const addButton = page.getByRole('button', { name: /add message/i });
 
     await newMessageInput.fill('Hi <streamer>!');
@@ -146,8 +146,8 @@ test.describe('Options Page', () => {
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html`);
 
-    const enabledInput = page.locator('input[placeholder*="Enter streamer name"]').first();
-    const addEnabledButton = page.locator('.bg-green-600').filter({ hasText: 'Add' });
+    const enabledInput = page.getByLabel('Add enabled streamer');
+    const addEnabledButton = page.getByRole('button', { name: 'Add' }).first();
 
     await enabledInput.fill('streamer1');
     await addEnabledButton.click();
@@ -163,8 +163,8 @@ test.describe('Options Page', () => {
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html`);
 
-    const disabledInput = page.locator('input[placeholder*="Enter streamer name"]').last();
-    const addDisabledButton = page.locator('.bg-red-600').filter({ hasText: 'Add' });
+    const disabledInput = page.getByLabel('Add disabled streamer');
+    const addDisabledButton = page.getByRole('button', { name: 'Add' }).last();
 
     await disabledInput.fill('annoying_streamer');
     await addDisabledButton.click();
@@ -201,7 +201,7 @@ test.describe('Options Page', () => {
     await page.close();
   });
 
-  test.skip('displays greeting history with timestamps', async ({ context, extensionId }) => {
+  test('displays greeting history with timestamps', async ({ context, extensionId }) => {
     const now = Date.now();
     await setExtensionStorage(context, extensionId, {
       state: {
@@ -216,9 +216,7 @@ test.describe('Options Page', () => {
     const page = await context.newPage();
     await page.goto(`chrome-extension://${extensionId}/options.html`);
 
-    // More specific selector - only in the Greeting History section
-    const historySection = page.locator('text=Greeting History').locator('..');
-    const historyItems = historySection.locator('.bg-gray-50.p-3.rounded-md');
+    const historyItems = page.getByRole('listitem');
     await expect(historyItems).toHaveCount(2);
 
     await page.close();

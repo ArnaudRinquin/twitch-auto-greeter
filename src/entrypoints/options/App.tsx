@@ -244,10 +244,11 @@ function App() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="frequency-input" className="block text-sm font-medium text-gray-700 mb-2">
                   Greeting Frequency (hours)
                 </label>
                 <input
+                  id="frequency-input"
                   type="number"
                   min="1"
                   max="168"
@@ -278,6 +279,7 @@ function App() {
                         config.delayRange[1],
                       )
                     }
+                    aria-label="Minimum delay in seconds"
                     className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
                   />
                   <span>-</span>
@@ -292,6 +294,7 @@ function App() {
                         parseInt(e.target.value) || 15,
                       )
                     }
+                    aria-label="Maximum delay in seconds"
                     className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
                   />
                 </div>
@@ -338,6 +341,7 @@ function App() {
                   value={newEnabledStreamer}
                   onChange={(e) => setNewEnabledStreamer(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddEnabledStreamer()}
+                  aria-label="Add enabled streamer"
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
                 />
                 <button
@@ -382,6 +386,7 @@ function App() {
                   value={newDisabledStreamer}
                   onChange={(e) => setNewDisabledStreamer(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAddDisabledStreamer()}
+                  aria-label="Add disabled streamer"
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
                 />
                 <button
@@ -525,6 +530,7 @@ function App() {
                     placeholder="Message text (use <streamer> for streamer name)"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
+                    aria-label="New message text"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-purple-500 focus:border-purple-500"
                   />
                 </div>
@@ -600,7 +606,7 @@ function App() {
             {Object.keys(state.lastMessageTimes).length === 0 ? (
               <p className="text-gray-600">No greetings sent yet</p>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2" role="list">
                 {Object.entries(state.lastMessageTimes)
                   .sort(([, a], [, b]) => b - a)
                   .map(([streamer, timestamp]) => {
@@ -609,6 +615,7 @@ function App() {
                       <div
                         key={streamer}
                         className="bg-gray-50 p-3 rounded-md"
+                        role="listitem"
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-medium">{streamer}</span>
