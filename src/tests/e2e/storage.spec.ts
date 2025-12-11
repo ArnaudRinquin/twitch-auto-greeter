@@ -153,8 +153,8 @@ test.describe('Storage Persistence', () => {
 
     // Set corrupted data
     await page.evaluate(() => {
-      return new Promise((resolve) => {
-        chrome.storage.local.set({ config: 'invalid' }, resolve);
+      return new Promise<void>((resolve) => {
+        chrome.storage.local.set({ config: 'invalid' }, () => resolve());
       });
     });
 

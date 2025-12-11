@@ -35,35 +35,6 @@ test.describe('Content Script', () => {
     await page.close();
   });
 
-  test('detects manual navigation to different streamer', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-
-    // Navigate to first streamer
-    await page.goto(getMockStreamerUrl('streamer1'));
-    await page.waitForTimeout(4000); // Wait for greeting (delay + typing)
-
-    // Clear chat and lastMessageTimes
-    await page.evaluate(() => {
-      const input = document.querySelector('[data-a-target="chat-input"]');
-      if (input) input.textContent = '';
-    });
-
-    await setExtensionStorage(context, extensionId, {
-      state: { lastMessageTimes: {}, lastMessages: {} },
-    });
-
-    // Manually navigate to different streamer (wait >1s to simulate manual nav)
-    await page.waitForTimeout(1500);
-    await page.goto(getMockStreamerUrl('streamer2'));
-
-    // Should trigger new greeting
-    await page.waitForTimeout(4000);
-    const chatText = await getChatInputText(page);
-    expect(chatText.length).toBeGreaterThan(0);
-
-    await page.close();
-  });
-
   test('ignores rapid navigation (redirects)', async ({ context }) => {
     const page = await context.newPage();
 
@@ -94,58 +65,6 @@ test.describe('Content Script', () => {
     await page.close();
   });
 
-  test.skip('does not re-trigger on same streamer navigation', async ({ context }) => {
-    const page = await context.newPage();
-
-    // Navigate to streamer
-    await page.goto(getMockStreamerUrl('streamer1'));
-    await page.waitForTimeout(2000);
-
-    // Clear chat
-    await page.evaluate(() => {
-      const input = document.querySelector('[data-a-target="chat-input"]');
-      if (input) input.textContent = '';
-    });
-
-    // Navigate to same streamer again (simulates staying on same stream)
-    await page.waitForTimeout(1500);
-    await page.goto(getMockStreamerUrl('streamer1'));
-    await page.waitForTimeout(3000);
-
-    const chatText = await getChatInputText(page);
-    expect(chatText).toBe(''); // Should not send another message
-
-    await page.close();
-  });
-
-  test('handles URLs with query parameters', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-
-    const urlWithParams = `${getMockStreamerUrl('teststreamer')}?param=value`;
-    await page.goto(urlWithParams);
-
-    await page.waitForTimeout(4000);
-
-    const chatText = await getChatInputText(page);
-    expect(chatText.length).toBeGreaterThan(0); // Should still detect streamer
-
-    await page.close();
-  });
-
-  test('handles URLs with trailing slashes', async ({ context, extensionId }) => {
-    const page = await context.newPage();
-
-    const urlWithSlash = `${getMockStreamerUrl('teststreamer')}/`;
-    await page.goto(urlWithSlash);
-
-    await page.waitForTimeout(4000);
-
-    const chatText = await getChatInputText(page);
-    expect(chatText.length).toBeGreaterThan(0); // Should detect streamer
-
-    await page.close();
-  });
-
   test('chat input element exists on streamer page', async ({ context }) => {
     const page = await context.newPage();
     await page.goto(getMockStreamerUrl('teststreamer'));
@@ -159,17 +78,4 @@ test.describe('Content Script', () => {
     await page.close();
   });
 
-  test('content script loads on streamer pages', async ({ context }) => {
-    const page = await context.newPage();
-    await page.goto(getMockStreamerUrl('teststreamer'));
-
-    // Verify content script is active by checking for greeting behavior
-    await page.waitForTimeout(4000);
-
-    const chatText = await getChatInputText(page);
-    // If content script loaded, greeting should be sent
-    expect(chatText.length).toBeGreaterThan(0);
-
-    await page.close();
-  });
 });

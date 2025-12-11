@@ -1,7 +1,5 @@
 import type { BrowserContext, Page } from '@playwright/test';
 import type { Config, State } from '../../../types';
-import { fileURLToPath } from 'url';
-import path from 'path';
 
 export async function getExtensionStorage(
   context: BrowserContext,

@@ -16,7 +16,6 @@ function App() {
   const [newEnabledStreamer, setNewEnabledStreamer] = useState('');
   const [newDisabledStreamer, setNewDisabledStreamer] = useState('');
   const [availableLanguages] = useState(getAllSupportedLanguages());
-  const [emotesLoaded, setEmotesLoaded] = useState(false);
   const [filterStreamer, setFilterStreamer] = useState<string>('');
   const [filterLanguages, setFilterLanguages] = useState<string[]>([]);
 
@@ -25,7 +24,6 @@ function App() {
     console.log('[App] Loading emotes...');
     loadEmotes().then((loaded) => {
       console.log('[App] Emotes loaded:', loaded);
-      setEmotesLoaded(loaded);
     });
   }, []);
 
