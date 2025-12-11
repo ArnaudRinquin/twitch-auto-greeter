@@ -27,36 +27,38 @@ test.describe('Greeting Flow', () => {
     });
   });
 
-  test.skip('does not send duplicate message within frequency window', async ({ context, extensionId }) => {
+  test('does not send duplicate message within frequency window', async ({ context, extensionId }) => {
     const page = await context.newPage();
     const streamerUrl = getMockStreamerUrl('teststreamer');
 
-    // First visit
+    // First visit - wait for message to be sent
     await page.goto(streamerUrl);
-    await page.waitForTimeout(4000); // Wait for greeting
+    await waitForChatMessage(page, 'Hello!', 10000);
 
-    // Wait a bit more for state to be updated via GREETING_SENT message
-    await page.waitForTimeout(500);
-
-    // Get storage to verify timestamp was recorded
-    let storage = await getExtensionStorage(context, extensionId);
-    expect(storage.state.lastMessageTimes['teststreamer']).toBeDefined();
-
-    // Clear chat input
-    await page.evaluate(() => {
-      const input = document.querySelector('[data-a-target="chat-input"]');
-      if (input) input.textContent = '';
+    // Get message count
+    const messageCountAfterFirst = await page.evaluate(() => {
+      const messagesContainer = document.getElementById('messages');
+      return messagesContainer?.querySelectorAll('.message').length || 0;
     });
+    expect(messageCountAfterFirst).toBe(1);
+
+    // Verify timestamp was recorded
+    const storage = await getExtensionStorage(context, extensionId);
+    expect(storage.state.lastMessageTimes['teststreamer']).toBeDefined();
 
     // Navigate away and back immediately (within frequency window)
     await page.goto('about:blank');
     await page.goto(streamerUrl);
 
-    // Wait a bit to ensure no message is sent
+    // Wait to ensure no new message is sent
     await page.waitForTimeout(3000);
 
-    const chatText = await getChatInputText(page);
-    expect(chatText).toBe(''); // No message should be sent
+    // Verify no additional message was sent
+    const messageCountAfterSecond = await page.evaluate(() => {
+      const messagesContainer = document.getElementById('messages');
+      return messagesContainer?.querySelectorAll('.message').length || 0;
+    });
+    expect(messageCountAfterSecond).toBe(0); // Messages container reset on navigation
 
     await page.close();
   });
@@ -112,12 +114,13 @@ test.describe('Greeting Flow', () => {
     await page.close();
   });
 
-  test.skip('uses message with specific streamer targeting', async ({ context, extensionId }) => {
+  test('uses message with specific streamer targeting', async ({ context, extensionId }) => {
+    // Note: Using messages without spaces as execCommand('insertText', ' ') doesn't work in test environment
     const config: Config = {
       enabled: true,
       messages: [
-        { text: 'Generic hello!', streamers: [], languages: [] },
-        { text: 'Special greeting for VIP!', streamers: ['vipstreamer'], languages: [] },
+        { text: 'Hello!', streamers: [], languages: [] },
+        { text: 'VIPgreeting!', streamers: ['vipstreamer'], languages: [] },
       ],
       defaultFrequency: 24 * 3600000,
       delayRange: [1, 2],
@@ -131,19 +134,18 @@ test.describe('Greeting Flow', () => {
     const page = await context.newPage();
     await page.goto(getMockStreamerUrl('vipstreamer'));
 
-    const messageReceived = await waitForChatMessage(page, 'VIP', 10000);
-    expect(messageReceived).toBe(true);
-
-    const chatText = await getChatInputText(page);
-    expect(chatText).toContain('VIP');
+    // Wait for VIP-specific greeting to be typed and sent
+    const messageWasSent = await waitForChatMessage(page, 'VIPgreeting!', 10000);
+    expect(messageWasSent).toBe(true);
 
     await page.close();
   });
 
-  test.skip('handles case-insensitive streamer names', async ({ context, extensionId }) => {
+  test('handles case-insensitive streamer names', async ({ context, extensionId }) => {
+    // Note: Using messages without spaces as execCommand('insertText', ' ') doesn't work in test environment
     const config: Config = {
       enabled: true,
-      messages: [{ text: 'Hello <streamer>!', streamers: [], languages: [] }],
+      messages: [{ text: 'Hello<streamer>!', streamers: [], languages: [] }],
       defaultFrequency: 24 * 3600000,
       delayRange: [1, 2],
     };
@@ -156,7 +158,7 @@ test.describe('Greeting Flow', () => {
     const page = await context.newPage();
     await page.goto(getMockStreamerUrl('CoolStreamer'));
 
-    const messageReceived = await waitForChatMessage(page, 'CoolStreamer', 10000);
+    const messageReceived = await waitForChatMessage(page, 'HelloCoolStreamer!', 10000);
     expect(messageReceived).toBe(true);
 
     // Verify storage uses lowercase

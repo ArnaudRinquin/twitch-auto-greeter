@@ -10,6 +10,7 @@ import { DEFAULT_CONFIG } from '../../types';
 import type { Config, State } from '../../types';
 
 test.describe('Storage Persistence', () => {
+  // Skipped: Background script initialization doesn't run reliably in test environment
   test.skip('initializes with default config on first install', async ({ context, extensionId }) => {
     await clearExtensionStorage(context, extensionId);
 
@@ -50,7 +51,7 @@ test.describe('Storage Persistence', () => {
     await page.close();
   });
 
-  test.skip('updates last message time after sending greeting', async ({ context, extensionId }) => {
+  test('updates last message time after sending greeting', async ({ context, extensionId }) => {
     const config: Config = {
       enabled: true,
       messages: [{ text: 'Hello!', streamers: [], languages: [] }],
@@ -66,7 +67,7 @@ test.describe('Storage Persistence', () => {
     const page = await context.newPage();
     await page.goto(getMockStreamerUrl('teststreamer'));
 
-    await waitForChatMessage(page, 'Hello', 10000);
+    await waitForChatMessage(page, 'Hello!', 10000);
 
     const storage = await getExtensionStorage(context, extensionId);
     expect(storage.state.lastMessageTimes['teststreamer']).toBeDefined();
@@ -80,7 +81,7 @@ test.describe('Storage Persistence', () => {
     await page.close();
   });
 
-  test.skip('maintains separate timestamps for different streamers', async ({ context, extensionId }) => {
+  test('maintains separate timestamps for different streamers', async ({ context, extensionId }) => {
     const config: Config = {
       enabled: true,
       messages: [{ text: 'Hello!', streamers: [], languages: [] }],
@@ -96,13 +97,13 @@ test.describe('Storage Persistence', () => {
     // Visit first streamer
     let page = await context.newPage();
     await page.goto(getMockStreamerUrl('streamer1'));
-    await waitForChatMessage(page, 'Hello', 10000);
+    await waitForChatMessage(page, 'Hello!', 10000);
     await page.close();
 
     // Visit second streamer
     page = await context.newPage();
     await page.goto(getMockStreamerUrl('streamer2'));
-    await waitForChatMessage(page, 'Hello', 10000);
+    await waitForChatMessage(page, 'Hello!', 10000);
     await page.close();
 
     // Check storage has both timestamps

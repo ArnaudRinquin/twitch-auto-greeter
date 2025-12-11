@@ -63,8 +63,17 @@ export async function waitForChatMessage(page: Page, expectedText: string, timeo
   try {
     await page.waitForFunction(
       (text) => {
-        const input = document.querySelector('[data-a-target="chat-input"]');
-        return input?.textContent?.includes(text);
+        const messagesContainer = document.getElementById('messages');
+        const messages = messagesContainer?.querySelectorAll('.message');
+        if (!messages) return false;
+
+        // Check if any sent message contains the expected text
+        for (const message of Array.from(messages)) {
+          if (message.textContent?.includes(text)) {
+            return true;
+          }
+        }
+        return false;
       },
       expectedText,
       { timeout: timeoutMs }
