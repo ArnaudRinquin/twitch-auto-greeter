@@ -147,10 +147,8 @@ test.describe('Options Page', () => {
     await page.goto(`chrome-extension://${extensionId}/options.html`);
 
     const enabledInput = page.getByLabel('Add enabled streamer');
-    const addEnabledButton = page.getByRole('button', { name: 'Add' }).first();
-
     await enabledInput.fill('streamer1');
-    await addEnabledButton.click();
+    await enabledInput.press('Enter');
     await page.waitForTimeout(500);
 
     const storage = await getExtensionStorage(context, extensionId);
@@ -164,10 +162,8 @@ test.describe('Options Page', () => {
     await page.goto(`chrome-extension://${extensionId}/options.html`);
 
     const disabledInput = page.getByLabel('Add disabled streamer');
-    const addDisabledButton = page.getByRole('button', { name: 'Add' }).last();
-
     await disabledInput.fill('annoying_streamer');
-    await addDisabledButton.click();
+    await disabledInput.press('Enter');
     await page.waitForTimeout(500);
 
     const storage = await getExtensionStorage(context, extensionId);
