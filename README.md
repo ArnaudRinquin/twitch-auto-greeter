@@ -91,6 +91,23 @@ The extension uses a **cascading message selection** strategy:
 
 Example: If you visit a French streamer with messages configured for both "French" and that streamer specifically, the streamer-specific message wins. If you visit an English stream without streamer-specific messages, an English greeting is automatically selected.
 
+## Magic Sauce
+
+### Language Tag Detection
+Twitch's language tags are loaded asynchronously by React after the initial page render, making them invisible to immediate DOM queries. We solved this using a MutationObserver that watches for tag elements to appear, with a 5-second timeout fallback. The system supports 80+ languages by mapping Twitch's display names (like "Français" or "日本語") to ISO 639-1 codes, enabling accurate language-aware greeting selection.
+
+### Typing into Twitch Chat
+Twitch uses Slate.js as its rich text editor, which requires precise keyboard event sequences to properly update its internal state. Simply setting the input value doesn't work. Our solution inserts text character-by-character, dispatching full keydown → beforeinput → insertText → input → keyup event sequences for each character, with 3-retry verification to ensure each character was successfully inserted. This technique reliably works despite Slate's complex state management.
+
+### Emote Preview Rendering
+Displaying emote previews in the options UI requires emote images without Twitch authentication. We combined two approaches: hardcoding 40+ Twitch global emotes (HeyGuys, Kappa, PogChamp, etc.) with their static CDN IDs, plus fetching additional emotes from the BetterTTV public API. This hybrid approach provides comprehensive emote rendering in message previews without requiring users to authenticate.
+
+### Marketing Content Generation
+The Chrome Web Store requires specific promotional assets: 440x280 and 1400x560 pixel promo tiles, plus a demo video. We created an HTML/CSS template with the exact dimensions and Twitch's brand colors, allowing us to generate pixel-perfect promo tiles via screenshot automation. The demo video was captured from actual UI interactions, showcasing real functionality rather than static mockups.
+
+### SPA Navigation Detection
+Twitch is a single-page application where URL changes don't always mean the user intentionally navigated to a new stream - auto-play and related streams change the URL automatically. We use a heuristic approach that compares previous and current URLs along with timing data to distinguish manual navigation from auto-navigation, ensuring greetings only happen when users intentionally visit a stream, avoiding spam.
+
 ## Tech Stack
 
 - **WXT Framework**: Next-gen browser extension framework
