@@ -167,4 +167,41 @@ test.describe('Greeting Flow', () => {
 
     await page.close();
   });
+
+  test('aborts message send on navigation during delay', async ({ context, extensionId }) => {
+    // Use longer delay to have time to navigate away
+    const config: Config = {
+      enabled: true,
+      messages: [{ text: 'FirstStreamer!', streamers: [], languages: [] }],
+      defaultFrequency: 24 * 3600000,
+      delayRange: [3, 3], // 3 second delay to allow navigation
+    };
+
+    await setExtensionStorage(context, extensionId, {
+      config,
+      state: { lastMessageTimes: {}, lastMessages: {} },
+    });
+
+    const page = await context.newPage();
+
+    // Navigate to first streamer
+    await page.goto(getMockStreamerUrl('firststreamer'));
+
+    // Wait 1 second (less than delay) then navigate to second streamer
+    await page.waitForTimeout(1000);
+    await page.goto(getMockStreamerUrl('secondstreamer'));
+
+    // Wait for original delay to expire + buffer
+    await page.waitForTimeout(3000);
+
+    // Verify no message was sent to second streamer
+    const chatText = await getChatInputText(page);
+    expect(chatText).toBe(''); // Message should have been aborted
+
+    // Verify no timestamp recorded for first streamer (message not sent)
+    const storage = await getExtensionStorage(context, extensionId);
+    expect(storage.state.lastMessageTimes['firststreamer']).toBeUndefined();
+
+    await page.close();
+  });
 });

@@ -91,7 +91,11 @@ export default defineContentScript({
         }
 
         if (response.message && response.delay && response.streamerName) {
-          const success = await sendGreetingAfterDelay(response.message, response.delay);
+          const success = await sendGreetingAfterDelay(
+            response.message,
+            response.delay,
+            response.streamerName,
+          );
 
           if (success) {
             // Confirm successful send to background script
@@ -112,11 +116,24 @@ export default defineContentScript({
     async function sendGreetingAfterDelay(
       message: string,
       delaySeconds: number,
+      expectedStreamer: string,
     ): Promise<boolean> {
       console.log(`[Content] Waiting ${delaySeconds}s before sending message`);
 
       // Wait for the specified delay
       await new Promise((resolve) => setTimeout(resolve, delaySeconds * 1000));
+
+      // Re-validate: check we're still on the expected streamer's page
+      const currentStreamInfo = createStreamInfo(window.location.href);
+      if (
+        !currentStreamInfo ||
+        currentStreamInfo.streamerName.toLowerCase() !== expectedStreamer.toLowerCase()
+      ) {
+        console.log(
+          `[Content] Aborting send - navigated away from ${expectedStreamer} to ${currentStreamInfo?.streamerName || 'unknown'}`,
+        );
+        return false;
+      }
 
       // Find the chat input
       const chatInput = document.querySelector<HTMLElement>(
